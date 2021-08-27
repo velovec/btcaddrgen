@@ -2,6 +2,7 @@
 #define __UTILS_H__
 
 #include <vector>
+#include <stdint.h>
 
 namespace utils {
 

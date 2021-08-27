@@ -3,6 +3,7 @@
 #include <cassert>
 
 #include <ecdsa/base58.h>
+#include <cstring>
 
 #include "utils.h"
 
