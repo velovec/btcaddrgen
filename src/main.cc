@@ -24,7 +24,7 @@ namespace btc {
     btc::Address addr;
   };
 
-  public Wallet generate() {
+  Wallet generate() {
     Wallet wallet;
 
     wallet.pKey = std::make_shared<ecdsa::Key>();
