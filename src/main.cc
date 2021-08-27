@@ -29,12 +29,12 @@ int main(int argc, const char *argv[]) {
 
     wallet.pKey = std::make_shared<ecdsa::Key>();
 
-    auto pubKey = pKey->CreatePubKey();
+    auto pubKey = wallet.pKey->CreatePubKey();
     unsigned char hash160[20];
 
     wallet.addr = btc::Address::FromPublicKey(pubKey.get_pub_key_data(), 0, hash160);
 
-    auto addrString = addr.ToString();
+    auto addrString = wallet.addr.ToString();
     // auto pKeyWif = btc::wif::PrivateKeyToWif(pKey->get_priv_key_data());
 
     // std::cout << "Address: " << addr.ToString() << std::endl;
