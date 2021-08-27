@@ -13,36 +13,17 @@
 #include <ecdsa/base58.h>
 #include <ecdsa/key.h>
 
+#include "btcwallet.h"
 #include "btcaddr.h"
 #include "btcwif.h"
 
 #define BUFF_SIZE 1024
 
-namespace btc {
-  struct Wallet {
-    std::shared_ptr<ecdsa::Key> pKey;
-    btc::Address addr;
-  };
-
-  Wallet generate() {
-    Wallet wallet;
-
-    wallet.pKey = std::make_shared<ecdsa::Key>();
-
-    auto pubKey = wallet.pKey->CreatePubKey();
-    unsigned char hash160[20];
-
-    wallet.addr = btc::Address::FromPublicKey(pubKey.get_pub_key_data(), 0, hash160);
-
-    return wallet;
-  }
-}
-
 int main(int argc, const char *argv[]) {
   for (int i = 0; i < 5000; i++ ) {
-    btc::Wallet wallet = btc::generate()
+    btc::Wallet wallet = btc::Wallet::Generate();
 
-    auto addrString = wallet.addr.ToString();
+    auto addrString = wallet.GetAddress().ToString();
     // auto pKeyWif = btc::wif::PrivateKeyToWif(pKey->get_priv_key_data());
 
     // std::cout << "Address: " << addr.ToString() << std::endl;

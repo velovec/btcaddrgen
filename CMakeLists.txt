@@ -16,6 +16,6 @@ include_directories(
 
 file(GLOB src "./src/*.cc")
 
-add_executable(btcaddrgen ${src})
+add_executable(btcaddrgen ${src} src/btcwallet.cpp src/btcwallet.h)
 
 target_link_libraries(btcaddrgen ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES} ${ECDSAXX})
