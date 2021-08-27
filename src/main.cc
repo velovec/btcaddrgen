@@ -18,12 +18,21 @@
 
 #define BUFF_SIZE 1024
 
+struct Wallet {
+  std::shared_ptr<ecdsa::Key> pKey;
+  btc::Address addr;
+};
+
 int main(int argc, const char *argv[]) {
   for (int i = 0; i < 5000; i++ ) {
-    std::shared_ptr<ecdsa::Key> pKey = std::make_shared<ecdsa::Key>();
+    Wallet wallet = new Wallet();
+
+    wallet.pKey = std::make_shared<ecdsa::Key>();
+
     auto pubKey = pKey->CreatePubKey();
     unsigned char hash160[20];
-    auto addr = btc::Address::FromPublicKey(pubKey.get_pub_key_data(), 0, hash160);
+
+    wallet.addr = btc::Address::FromPublicKey(pubKey.get_pub_key_data(), 0, hash160);
 
     auto addrString = addr.ToString();
     // auto pKeyWif = btc::wif::PrivateKeyToWif(pKey->get_priv_key_data());
