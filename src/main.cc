@@ -163,8 +163,8 @@ int main(int argc, const char *argv[]) {
     unsigned char hash160[20];
     auto addr = btc::Address::FromPublicKey(pubKey.get_pub_key_data(), 0, hash160);
 
-    std::cout << "Address: " << addr.ToString() << std::endl;
-    std::cout << "Private key: " << base58::EncodeBase58(pKey->get_priv_key_data()) << std::endl;
+    // std::cout << "Address: " << addr.ToString() << std::endl;
+    // std::cout << "Private key: " << base58::EncodeBase58(pKey->get_priv_key_data()) << std::endl;
   }
 
   return 0;
