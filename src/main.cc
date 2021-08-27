@@ -157,103 +157,13 @@ bool ImportFromHexString(const std::string &hex_str,
 
 /// Main program.
 int main(int argc, const char *argv[]) {
-  try {
-    Args args(argc, argv);
-    if (args.is_help()) {
-      ShowHelp(args);
-      return 0;
-    }
+  std::shared_ptr<ecdsa::Key> pkey = std:make_shared<ecdsa::Key>();
+  auto pubKey = pKey->CreatePubKey();
+  unsigned char hash160[20];
+  auto addr = btc::Address::FromPublicKey(pub_key.get_pub_key_data(), prefix_char, hash160);
 
-    if (args.is_generate_new_key()) {
-      ShowKeyInfo(std::make_shared<ecdsa::Key>(), args.get_prefix_char());
-      return 0;
-    }
-
-    // Import key.
-    std::shared_ptr<ecdsa::Key> pkey;
-    std::string priv_key_b58 = args.get_import_priv_key();
-    if (!priv_key_b58.empty()) {
-      std::vector<uint8_t> priv_key;
-      // Checking WIF format.
-      if (btc::wif::VerifyWifString(priv_key_b58)) {
-        // Decoding private key in WIF format.
-        priv_key = btc::wif::WifToPrivateKey(priv_key_b58);
-      } else {
-        // Decoding private key in plain base58 data.
-        bool succ;
-        if (args.is_hex()) {
-          succ = ImportFromHexString(priv_key_b58, priv_key);
-        } else {
-          succ = base58::DecodeBase58(priv_key_b58.c_str(), priv_key);
-        }
-        if (!succ) {
-          std::cerr << "Failed to decode base58!" << std::endl;
-          return 1;
-        }
-      }
-      pkey = std::make_shared<ecdsa::Key>(priv_key);
-      ShowKeyInfo(pkey, args.get_prefix_char());
-    }
-
-    // Signing file?
-    if (!args.get_signing_file().empty()) {
-      if (pkey == nullptr) {
-        pkey = std::make_shared<ecdsa::Key>();
-        ShowKeyInfo(pkey, args.get_prefix_char());
-      }
-      std::vector<uint8_t> signature;
-      bool succ;
-      std::tie(signature, succ) = Signing(pkey, args.get_signing_file());
-      if (succ) {
-        std::string signature_b58 = base58::EncodeBase58(signature);
-        std::cout << "Signature: " << signature_b58 << std::endl;
-        return 0;
-      }
-      return 1;
-    }
-
-    // Verifying
-    if (!args.get_import_pub_key().empty() &&
-        !args.get_verifying_file().empty() && !args.get_signature().empty()) {
-      // Verifying
-      std::vector<uint8_t> pub_key_data;
-      bool succ;
-      if (args.is_hex()) {
-        succ = ImportFromHexString(args.get_import_pub_key(), pub_key_data);
-      } else {
-        succ = base58::DecodeBase58(args.get_import_pub_key(), pub_key_data);
-      }
-      if (!succ) {
-        std::cerr << "Cannot decode public key from base58 string."
-                  << std::endl;
-        return 1;
-      }
-      std::vector<uint8_t> signature;
-      if (args.is_hex()) {
-        succ = ImportFromHexString(args.get_signature(), signature);
-      } else {
-        succ = base58::DecodeBase58(args.get_signature(), signature);
-      }
-      if (!succ) {
-        std::cerr << "Cannot decode signature from base58 string." << std::endl;
-        return 1;
-      }
-      ecdsa::PubKey pub_key(pub_key_data);
-      succ = Verifying(pub_key, args.get_verifying_file(), signature);
-      if (succ) {
-        std::cout << "Verified OK." << std::endl;
-        return 0;
-      }
-      return 1;
-    }
-
-    if (priv_key_b58.empty()) {
-      std::cerr << "No argument, -h to show help." << std::endl;
-    }
-    return 1;
-  } catch (std::exception &e) {
-    std::cerr << e.what() << std::endl;
-  }
+  std::cout << "Address: " << addr.ToString() << std::endl;
+  std::cout << "Private key: " << base58::EncodeBase58(pkey->get_priv_key_data()) << std::endl;
 
   return 0;
 }
