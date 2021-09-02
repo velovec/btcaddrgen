@@ -23,7 +23,7 @@ int main(int argc, const char *argv[]) {
   for (int i = 0; i < 5000; i++ ) {
     btc::Wallet* wallet = btc::Wallet::Generate();
 
-    auto addrString = wallet.GetAddress().ToString();
+    auto addrString = wallet->GetAddress().ToString();
     // auto pKeyWif = btc::wif::PrivateKeyToWif(pKey->get_priv_key_data());
 
     // std::cout << "Address: " << addr.ToString() << std::endl;
