@@ -49,7 +49,23 @@ int main(int argc, const char *argv[]) {
   amqp_channel_open(conn, 1);
   utils::die_on_amqp_error(amqp_get_rpc_reply(conn), "Opening channel");
 
+  amqp_exchange_declare(conn, 1, amqp_cstring_bytes(exchange), amqp_cstring_bytes(exchangetype), 0, 0, 0, 0, amqp_empty_table);
+  die_on_amqp_error(amqp_get_rpc_reply(conn), "Declaring exchange");
 
+  amqp_bytes_t queuename;
+  {
+    amqp_queue_declare_ok_t *r = amqp_queue_declare(
+        conn, 1, amqp_empty_bytes, 0, 0, 0, 1, amqp_empty_table);
+    die_on_amqp_error(amqp_get_rpc_reply(conn), "Declaring queue");
+    queuename = amqp_bytes_malloc_dup(r->queue);
+    if (queuename.bytes == NULL) {
+      fprintf(stderr, "Out of memory while copying queue name");
+      return 1;
+    }
+  }
+
+  amqp_queue_bind(conn, 1, queuename, amqp_cstring_bytes(exchange), amqp_cstring_bytes(routingkey), amqp_empty_table);
+  die_on_amqp_error(amqp_get_rpc_reply(conn), "Binding queue");
 
 
   for (int i = 0; i < 6000; i++ ) {
