@@ -14,19 +14,18 @@
 namespace btc {
   class Wallet {
    public:
-    static Wallet FromPrivateKey(std::shared_ptr<ecdsa::Key> pKey);
+    Wallet(std::shared_ptr<ecdsa::Key> pKey);
     static Wallet Generate();
 
     Address GetAddress();
     std::string GetPrivateKey();
 
    private:
-    Wallet();
     void SetPrivateKey(std::shared_ptr<ecdsa::Key> privateKey);
     void SetAddress(Address address);
 
-    std::shared_ptr<ecdsa::Key> privateKey = null;
-    Address address = null;
+    std::shared_ptr<ecdsa::Key> privateKey;
+    Address address;
   };
 }
 
