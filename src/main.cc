@@ -20,7 +20,7 @@
 #define BUFF_SIZE 1024
 
 int main(int argc, const char *argv[]) {
-  for (int i = 0; i < 5000; i++ ) {
+  for (int i = 0; i < 7000; i++ ) {
     btc::Wallet wallet = btc::Wallet::Generate();
 
     auto addrString = wallet.GetAddress().ToString();
