@@ -13,8 +13,8 @@
 #include <ecdsa/base58.h>
 #include <ecdsa/key.h>
 
-#include <rabbitmq-c/amqp.h>
-#include <rabbitmq-c/tcp_socket.h>
+#include <amqp.h>
+#include <tcp_socket.h>
 
 #include "btcwallet.h"
 #include "btcaddr.h"

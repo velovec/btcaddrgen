@@ -2,7 +2,7 @@
 #define __UTILS_H__
 
 #include <vector>
-#include <rabbitmq-c/amqp.h>
+#include <amqp.h>
 #include <stdint.h>
 
 namespace utils {
