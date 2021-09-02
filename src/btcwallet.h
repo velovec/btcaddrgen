@@ -14,7 +14,6 @@
 namespace btc {
   class Wallet {
    public:
-    Wallet(std::shared_ptr<ecdsa::Key> pKey);
     static Wallet Generate();
 
     Address GetAddress();
@@ -22,10 +21,10 @@ namespace btc {
 
    private:
     void SetPrivateKey(std::shared_ptr<ecdsa::Key> privateKey);
-    void SetAddress(Address address);
+
+    Wallet() {};
 
     std::shared_ptr<ecdsa::Key> privateKey;
-    Address address;
   };
 }
 

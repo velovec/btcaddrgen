@@ -9,22 +9,17 @@ namespace btc {
   Wallet Wallet::Generate() {
     std::shared_ptr<ecdsa::Key> pKey = std::make_shared<ecdsa::Key>();
 
-    Wallet wallet = new Wallet(pKey);
+    Wallet wallet;
+    wallet.SetPrivateKey(pKey);
 
     return wallet;
   }
 
-  Wallet::Wallet(std::shared_ptr<ecdsa::Key> pKey) {
-    this->SetPrivateKey(pKey);
-
+  Address Wallet::GetAddress() {
     auto pubKey = pKey->CreatePubKey();
     unsigned char hash160[20];
 
-    this->SetAddress(btc::Address::FromPublicKey(pubKey.get_pub_key_data(), 0, hash160));
-  }
-
-  Address Wallet::GetAddress() {
-    return this->address;
+    return btc::Address::FromPublicKey(pubKey.get_pub_key_data(), 0, hash160);
   }
 
   std::string Wallet::GetPrivateKey() {
