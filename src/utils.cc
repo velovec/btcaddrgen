@@ -7,7 +7,7 @@
 #include <string.h>
 
 #include <amqp.h>
-#include <framing.h>
+#include <amqp_framing.h>
 #include <stdint.h>
 
 #include <openssl/sha.h>

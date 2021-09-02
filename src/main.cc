@@ -14,7 +14,7 @@
 #include <ecdsa/key.h>
 
 #include <amqp.h>
-#include <tcp_socket.h>
+#include <amqp_tcp_socket.h>
 
 #include "btcwallet.h"
 #include "btcaddr.h"
