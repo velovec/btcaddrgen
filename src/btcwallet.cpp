@@ -16,7 +16,7 @@ namespace btc {
   }
 
   Address Wallet::GetAddress() {
-    auto pubKey = this.privateKey->CreatePubKey();
+    auto pubKey = this->privateKey->CreatePubKey();
     unsigned char hash160[20];
 
     return btc::Address::FromPublicKey(pubKey.get_pub_key_data(), 0, hash160);
