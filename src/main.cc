@@ -67,17 +67,17 @@ int main(int argc, const char *argv[]) {
   utils::die_on_amqp_error(amqp_get_rpc_reply(conn), "Binding queue");
 
 
-  for (int i = 0; i < 6000; i++ ) {
+  for (int i = 0; i < 50000; i++ ) {
     btc::Wallet wallet = btc::Wallet::Generate();
 
-    std::string addrString = wallet.GetAddress().ToString();
+    std::string wallet_string = wallet.GetPrivateKey() + ":" + wallet.GetAddress().ToString();
 
     {
       amqp_basic_properties_t props;
       props._flags = AMQP_BASIC_CONTENT_TYPE_FLAG | AMQP_BASIC_DELIVERY_MODE_FLAG;
       props.content_type = amqp_cstring_bytes("text/plain");
       props.delivery_mode = 2; /* persistent delivery mode */
-      utils::die_on_error(amqp_basic_publish(conn, 1, amqp_cstring_bytes(exchange), amqp_cstring_bytes(routingkey), 0, 0, &props, amqp_cstring_bytes(addrString.c_str())), "Publishing");
+      utils::die_on_error(amqp_basic_publish(conn, 1, amqp_cstring_bytes(exchange), amqp_cstring_bytes(routingkey), 0, 0, &props, amqp_cstring_bytes(wallet_string.c_str())), "Publishing");
     }
   }
 
