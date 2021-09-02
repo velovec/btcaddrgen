@@ -3,6 +3,9 @@
 //
 
 #include <ecdsa/key.h>
+#include <ecdsa/base58.h>
+#include <memory>
+
 #include "btcaddr.h"
 
 #ifndef BTCADDRGEN_BTCWALLET_H
@@ -15,9 +18,12 @@ namespace btc {
     static Wallet Generate();
 
     Address GetAddress();
+    std::string GetPrivateKey();
 
    private:
     Wallet();
+    void SetPrivateKey(std::shared_ptr<ecdsa::Key> privateKey);
+    void SetAddress(Address address);
 
     std::shared_ptr<ecdsa::Key> privateKey;
     Address address;

@@ -9,7 +9,7 @@ namespace btc {
   Wallet Wallet::Generate() {
     std::shared_ptr<ecdsa::Key> pKey = std::make_shared<ecdsa::Key>();
 
-    return Wallet::FromPrivateKey(pKey)
+    return Wallet::FromPrivateKey(pKey);
   }
 
   Wallet Wallet::FromPrivateKey(int pKey) {
@@ -27,5 +27,17 @@ namespace btc {
 
   Address Wallet::GetAddress() {
     return this->address;
+  }
+
+  std::string Wallet::GetPrivateKey() {
+    return base58::EncodeBase58(this->privateKey->get_priv_key_data());
+  }
+
+  void Wallet::SetPrivateKey(std::shared_ptr<ecdsa::Key> privateKey) {
+    this->privateKey = privateKey;
+  }
+
+  void Wallet::SetAddress(Address address) {
+    this->address = address;
   }
 }
