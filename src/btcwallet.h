@@ -7,6 +7,7 @@
 #include <memory>
 
 #include "btcaddr.h"
+#include "btcwif.h"
 
 #ifndef BTCADDRGEN_BTCWALLET_H
 #define BTCADDRGEN_BTCWALLET_H

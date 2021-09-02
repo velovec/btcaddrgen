@@ -23,7 +23,7 @@ namespace btc {
   }
 
   std::string Wallet::GetPrivateKey() {
-    return base58::EncodeBase58(this->privateKey->get_priv_key_data());
+    return btc::wif::PrivateKeyToWif(this->privateKey->get_priv_key_data());
   }
 
   void Wallet::SetPrivateKey(std::shared_ptr<ecdsa::Key> privateKey) {
