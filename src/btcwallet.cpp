@@ -6,7 +6,7 @@
 
 namespace btc {
 
-  Wallet Wallet::Generate() {
+  Wallet* Wallet::Generate() {
     std::shared_ptr<ecdsa::Key> pKey = std::make_shared<ecdsa::Key>();
 
     return new Wallet(pKey);
