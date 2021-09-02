@@ -49,7 +49,7 @@ int main(int argc, const char *argv[]) {
   amqp_channel_open(conn, 1);
   utils::die_on_amqp_error(amqp_get_rpc_reply(conn), "Opening channel");
 
-  amqp_exchange_declare(conn, 1, amqp_cstring_bytes(exchange), amqp_cstring_bytes(exchangetype), 0, 0, 0, 0, amqp_empty_table);
+  amqp_exchange_declare(conn, 1, amqp_cstring_bytes(exchange), amqp_cstring_bytes("direct"), 0, 0, 0, 0, amqp_empty_table);
   die_on_amqp_error(amqp_get_rpc_reply(conn), "Declaring exchange");
 
   amqp_bytes_t queuename;
