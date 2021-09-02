@@ -7,7 +7,7 @@ set(CMAKE_CXX_FLAGS_DEBUG "-g -O0")
 
 find_package(Boost REQUIRED program_options)
 find_package(OpenSSL REQUIRED)
-find_library(RABBITMQ rabbitmq-c)
+find_package(Rabbitmqc REQUIRED)
 find_library(ECDSAXX ecdsa++)
 
 include_directories(
@@ -19,4 +19,4 @@ file(GLOB src "./src/*.cc")
 
 add_executable(btcaddrgen ${src} src/btcwallet.cpp src/btcwallet.h)
 
-target_link_libraries(btcaddrgen ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES} ${ECDSAXX} ${RABBITMQ})
+target_link_libraries(btcaddrgen ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES} ${ECDSAXX} ${Rabbitmqc_LIBRARY})
