@@ -7,7 +7,7 @@ set(CMAKE_CXX_FLAGS_DEBUG "-g -O0")
 
 find_package(Boost REQUIRED program_options)
 find_package(OpenSSL REQUIRED)
-find_package(rabbitmq REQUIRED)
+find_package(librabbitmq REQUIRED)
 find_library(ECDSAXX ecdsa++)
 
 include_directories(
