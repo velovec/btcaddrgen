@@ -29,8 +29,4 @@ namespace btc {
   void Wallet::SetPrivateKey(std::shared_ptr<ecdsa::Key> privateKey) {
     this->privateKey = privateKey;
   }
-
-  void Wallet::SetAddress(Address address) {
-    this->address = address;
-  }
 }
