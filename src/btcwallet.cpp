@@ -12,7 +12,7 @@ namespace btc {
     return Wallet::FromPrivateKey(pKey);
   }
 
-  Wallet Wallet::FromPrivateKey(int pKey) {
+  Wallet Wallet::FromPrivateKey(std::shared_ptr<ecdsa::Key> pKey) {
     Wallet wallet;
 
     wallet.privateKey = pKey;
