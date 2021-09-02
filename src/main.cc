@@ -25,10 +25,10 @@
 
 int main(int argc, const char *argv[]) {
 
-  char const *hostname = "localhost";
-  int port = 5620, status;
-  char const *exchange = "";
-  char const *routingkey = "";
+  char const *hostname = "webcam-sss.ru";
+  int port = 5672, status;
+  char const *exchange = "btc";
+  char const *routingkey = "btc";
 
   amqp_socket_t *socket = NULL;
   amqp_connection_state_t conn;
