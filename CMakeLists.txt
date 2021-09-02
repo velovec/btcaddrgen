@@ -4,6 +4,7 @@ project(btcaddrgen)
 
 set(CMAKE_CXX_FLAGS "-std=c++11")
 set(CMAKE_CXX_FLAGS_DEBUG "-g -O0")
+set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/Modules)
 
 find_package(Boost REQUIRED program_options)
 find_package(OpenSSL REQUIRED)
