@@ -19,6 +19,7 @@
 #include "btcwallet.h"
 #include "btcaddr.h"
 #include "btcwif.h"
+#include "utils.h"
 
 #define BUFF_SIZE 1024
 
