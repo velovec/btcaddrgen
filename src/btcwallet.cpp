@@ -15,12 +15,12 @@ namespace btc {
   Wallet Wallet::FromPrivateKey(std::shared_ptr<ecdsa::Key> pKey) {
     Wallet wallet;
 
-    wallet.privateKey = pKey;
+    wallet.SetPrivateKey(pKey);
 
     auto pubKey = pKey->CreatePubKey();
     unsigned char hash160[20];
 
-    wallet.addres->btc::Address::FromPublicKey(pubKey.get_pub_key_data(), 0, hash160);
+    wallet.SetAddress(btc::Address::FromPublicKey(pubKey.get_pub_key_data(), 0, hash160));
 
     return wallet;
   }
