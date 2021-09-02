@@ -25,8 +25,8 @@ namespace btc {
     void SetPrivateKey(std::shared_ptr<ecdsa::Key> privateKey);
     void SetAddress(Address address);
 
-    std::shared_ptr<ecdsa::Key> privateKey;
-    Address address;
+    std::shared_ptr<ecdsa::Key> privateKey = null;
+    Address address = null;
   };
 }
 
