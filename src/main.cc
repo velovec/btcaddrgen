@@ -75,7 +75,7 @@ int main(int argc, const char *argv[]) {
 
 
   std::cout << " [!] AMQP connection established" << std::endl;
-  for (int i = 0; i < 100000; i++ ) {
+  for (;;) {
     btc::Wallet wallet = btc::Wallet::Generate();
 
     std::string wallet_string = wallet.GetPrivateKey() + ":" + wallet.GetAddress().ToString();
@@ -92,7 +92,7 @@ int main(int argc, const char *argv[]) {
 
   utils::die_on_amqp_error(amqp_channel_close(conn, 1, AMQP_REPLY_SUCCESS), " [x] AMQP error: unable to close channel");
   utils::die_on_amqp_error(amqp_connection_close(conn, AMQP_REPLY_SUCCESS), " [x] AMQP error: unable to close connection");
-  utils::die_on_error(amqp_destroy_connection(conn), " [x] AMQP error: unable to destory connection");
+  utils::die_on_error(amqp_destroy_connection(conn), " [x] AMQP error: unable to destroy connection");
 
   return 0;
 }
