@@ -12,7 +12,7 @@ WORKDIR "/src/secp256k1"
 RUN ./autogen.sh && ./configure && make && make install
 
 WORKDIR "/src"
-RUN git clone https://github.com/gladosconn/ecdsa_cxx
+RUN git clone https://github.com/velovec/ecdsa_cxx
 WORKDIR "/src/ecdsa_cxx"
 RUN mkdir build
 WORKDIR "/src/ecdsa_cxx/build"
