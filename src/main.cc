@@ -54,38 +54,30 @@ int main(int argc, const char *argv[]) {
   amqp_exchange_declare(conn, 1, amqp_cstring_bytes(exchange), amqp_cstring_bytes("direct"), 0, 0, 0, 0, amqp_empty_table);
   utils::die_on_amqp_error(amqp_get_rpc_reply(conn), " [x] AMQP error: unable to declare exchange");
 
-  amqp_bytes_t queuename;
-  {
-    amqp_queue_declare_ok_t *r = amqp_queue_declare(conn, 1, amqp_cstring_bytes(routingkey), 0, 0, 0, 0, amqp_empty_table);
-    utils::die_on_amqp_error(amqp_get_rpc_reply(conn), " [x] AMQP error: unable to declare queue");
-    queuename = amqp_bytes_malloc_dup(r->queue);
-    if (queuename.bytes == NULL) {
-      fprintf(stderr, "Out of memory while copying queue name");
-      return 1;
-    }
-
-    if (r->message_count > 300000) {
-      std::cout << " [!] AMQP queue is full" << std::endl;
-      return 1;
-    }
-  }
-
-  amqp_queue_bind(conn, 1, queuename, amqp_cstring_bytes(exchange), amqp_cstring_bytes(routingkey), amqp_empty_table);
-  utils::die_on_amqp_error(amqp_get_rpc_reply(conn), "[x] AMQP error: unable to bind queue");
-
-
   std::cout << " [!] AMQP connection established" << std::endl;
   for (;;) {
-    btc::Wallet wallet = btc::Wallet::Generate();
+    std::string message = "";
+    for (int i = 0; i < 200; i++) {
+      btc::Wallet wallet = btc::Wallet::Generate();
 
-    std::string wallet_string = wallet.GetPrivateKey() + ":" + wallet.GetAddress().ToString();
+      if (i > 0) {
+        message += ";";
+      }
+
+      message += wallet.GetPrivateKey() + ":";
+      message += wallet.GetAddress(btc::A1C).ToString() + ":";
+      message += wallet.GetAddress(btc::A1U).ToString() + ":";
+      message += wallet.GetAddress(btc::A3).ToString() + ":";
+      message += wallet.GetAddress(btc::B32PK).ToString() + ":";
+      message += wallet.GetAddress(btc::B32S).ToString();
+    }
 
     {
       amqp_basic_properties_t props;
       props._flags = AMQP_BASIC_CONTENT_TYPE_FLAG | AMQP_BASIC_DELIVERY_MODE_FLAG;
       props.content_type = amqp_cstring_bytes("text/plain");
-      props.delivery_mode = 2; /* persistent delivery mode */
-      utils::die_on_error(amqp_basic_publish(conn, 1, amqp_cstring_bytes(exchange), amqp_cstring_bytes(routingkey), 0, 0, &props, amqp_cstring_bytes(wallet_string.c_str())), " [x] AMPQ error: unable to publish");
+      props.delivery_mode = 1; /* persistent delivery mode */
+      utils::die_on_error(amqp_basic_publish(conn, 1, amqp_cstring_bytes(exchange), amqp_cstring_bytes(routingkey), 0, 0, &props, amqp_cstring_bytes(message.c_str())), " [x] AMPQ error: unable to publish");
     }
   }
   std::cout << " [+] AMQP payload sent" << std::endl;

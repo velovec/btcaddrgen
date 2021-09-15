@@ -1,10 +1,10 @@
 #include "btcwif.h"
 
 #include <cassert>
-
-#include <ecdsa/base58.h>
 #include <cstring>
+#include <iostream>
 
+#include "ecdsa/base58.h"
 #include "utils.h"
 
 namespace btc {
@@ -38,7 +38,7 @@ std::string PrivateKeyToWif(const std::vector<uint8_t> &priv_key) {
 std::vector<uint8_t> WifToPrivateKey(const std::string &priv_key_str) {
   // 1. Revert base58 to data.
   std::vector<uint8_t> pk1;
-  assert(base58::DecodeBase58(priv_key_str, pk1));
+  bool success = base58::DecodeBase58(priv_key_str, pk1);
 
   // 2. Calculate size.
   size_t size;
