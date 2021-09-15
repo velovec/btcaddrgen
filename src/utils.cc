@@ -6,6 +6,7 @@
 #include <openssl/sha.h>
 #include <cstdarg>
 #include <cstdint>
+#include <cstring>
 
 #include <fstream>
 #include <iomanip>
