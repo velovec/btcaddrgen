@@ -70,7 +70,7 @@ int main(int argc, const char *argv[]) {
         message += ";";
       }
 
-      std::cout << "I: " << i << std::endl;
+      std::cout << "I: " << (unsigned int) i << std::endl;
 
       message += wallet.GetPrivateKey() + ":";
       message += wallet.GetAddress(btc::A1C).ToString() + ":";
