@@ -7,6 +7,7 @@
 #include <sstream>
 #include <tuple>
 #include <vector>
+#include <cstdint>
 
 #include <openssl/sha.h>
 
