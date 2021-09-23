@@ -66,6 +66,8 @@ int main(int argc, const char *argv[]) {
 
       btc::Wallet wallet = btc::Wallet::FromPrivateKeyData(baseKey);
 
+      wallet.ShowPrivateKeyInfo();
+
       if (i > 0) {
         message += ";";
       }
