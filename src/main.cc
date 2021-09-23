@@ -78,6 +78,8 @@ int main(int argc, const char *argv[]) {
       message += wallet.GetAddress(btc::B32S).ToString();
     }
 
+    std::cout << " [+] Generated" << message.length() << std::endl;
+
     {
       amqp_basic_properties_t props;
       props._flags = AMQP_BASIC_CONTENT_TYPE_FLAG | AMQP_BASIC_DELIVERY_MODE_FLAG;
