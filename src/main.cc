@@ -66,8 +66,6 @@ int main(int argc, const char *argv[]) {
 
       btc::Wallet wallet = btc::Wallet::FromPrivateKeyData(baseKey);
 
-      wallet.ShowPrivateKeyInfo();
-
       if (i > 0) {
         message += ";";
       }
@@ -87,6 +85,7 @@ int main(int argc, const char *argv[]) {
       props.delivery_mode = 1; /* persistent delivery mode */
       utils::die_on_error(amqp_basic_publish(conn, 1, amqp_cstring_bytes(exchange), amqp_cstring_bytes(routingkey), 0, 0, &props, amqp_cstring_bytes(message.c_str())), " [x] AMPQ error: unable to publish");
     }
+    std::cout << " [+] AMQP: sent" << std::endl;
   }
   std::cout << " [+] AMQP payload sent" << std::endl;
 
