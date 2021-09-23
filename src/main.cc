@@ -70,8 +70,6 @@ int main(int argc, const char *argv[]) {
         message += ";";
       }
 
-      std::cout << "I: " << (unsigned int) i << std::endl;
-
       message += wallet.GetPrivateKey() + ":";
       message += wallet.GetAddress(btc::A1C).ToString() + ":";
       message += wallet.GetAddress(btc::A1U).ToString() + ":";
@@ -80,7 +78,17 @@ int main(int argc, const char *argv[]) {
       message += wallet.GetAddress(btc::B32S).ToString();
     }
 
-    std::cout << " [+] Generated" << message.length() << std::endl;
+    baseKey[baseKey.size() - 1] = 255;
+    btc::Wallet wallet = btc::Wallet::FromPrivateKeyData(baseKey);
+
+    message += ";";
+
+    message += wallet.GetPrivateKey() + ":";
+    message += wallet.GetAddress(btc::A1C).ToString() + ":";
+    message += wallet.GetAddress(btc::A1U).ToString() + ":";
+    message += wallet.GetAddress(btc::A3).ToString() + ":";
+    message += wallet.GetAddress(btc::B32PK).ToString() + ":";
+    message += wallet.GetAddress(btc::B32S).ToString();
 
     {
       amqp_basic_properties_t props;
