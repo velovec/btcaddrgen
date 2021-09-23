@@ -18,8 +18,10 @@ namespace btc {
     static Wallet Generate();
     static Wallet FromWifPrivateKey(const std::string& wif);
     static Wallet FromHexPrivateKey(const std::string& hex);
+    static Wallet FromPrivateKeyData(const std::vector<uint8_t> pKeyData);
 
     Address GetAddress(AddressType type);
+    std::vector<uint8_t> GetPrivateKeyData();
     std::string GetPrivateKey();
     void ShowPrivateKeyInfo();
 

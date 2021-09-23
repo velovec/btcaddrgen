@@ -57,8 +57,14 @@ int main(int argc, const char *argv[]) {
   std::cout << " [!] AMQP connection established" << std::endl;
   for (;;) {
     std::string message = "";
-    for (int i = 0; i < 200; i++) {
-      btc::Wallet wallet = btc::Wallet::Generate();
+    btc::Wallet baseWallet = btc::Wallet::Generate();
+    std::vector<uint8_t> baseKey = baseWallet.GetPrivateKeyData();
+
+    baseKey[baseKey.size() - 1] =
+
+    for (uint8_t i = 0; i < 256; i++) {
+      baseKey[baseKey.size() - 1] = i;
+      btc::Wallet wallet = btc::Wallet::FromPrivateKeyData(baseKey);
 
       if (i > 0) {
         message += ";";

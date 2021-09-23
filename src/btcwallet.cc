@@ -42,6 +42,15 @@ namespace btc {
     return wallet;
   }
 
+  Wallet Wallet::FromPrivateKeyData(const std::vector<uint8_t> pKeyData) {
+    std::shared_ptr<ecdsa::Key> pKey = std::make_shared<ecdsa::Key>(pKeyData);
+
+    Wallet wallet;
+    wallet.SetPrivateKey(pKey);
+
+    return wallet;
+  }
+
   Address Wallet::GetAddress(AddressType type) {
     if (type == A1U) {
       this->privateKey->CalculatePublicKey(false);
@@ -67,6 +76,10 @@ namespace btc {
 
   std::string Wallet::GetPrivateKey() {
     return btc::wif::PrivateKeyToWif(this->privateKey->get_priv_key_data());
+  }
+
+  std::vector<uint8_t> Wallet::GetPrivateKeyData() {
+    return this->privateKey->get_priv_key_data();
   }
 
   void Wallet::SetPrivateKey(std::shared_ptr<ecdsa::Key> privateKey) {
