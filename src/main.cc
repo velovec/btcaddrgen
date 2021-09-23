@@ -61,10 +61,9 @@ int main(int argc, const char *argv[]) {
     btc::Wallet baseWallet = btc::Wallet::Generate();
     std::vector<uint8_t> baseKey = baseWallet.GetPrivateKeyData();
 
-    baseKey[baseKey.size() - 1] =
-
-    for (uint8_t i = 0; i < 256; i++) {
+    for (uint8_t i = 0; i <= 255; i++) {
       baseKey[baseKey.size() - 1] = i;
+
       btc::Wallet wallet = btc::Wallet::FromPrivateKeyData(baseKey);
 
       if (i > 0) {
