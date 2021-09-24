@@ -253,16 +253,16 @@ static void start_consuming(amqp_connection_state_t conn, amqp_bytes_t taskQueue
 
         std::cout << " [!] Got new block: " << blockHex << std::endl;
         if (line == "direct") {
-          std::cout << " [!] Generator: DIRECT from: " << (int) from << " to: " << (int) to << std::endl;
+          std::cout << " [!] Generator: DIRECT from: " << (int) from << " to: " << (int) to << " block size: " << (depth * 8) << std::endl;
           generate_direct_range(conn, depth, from, to, blockData, on_generate);
         } else if (line == "reverse") {
-          std::cout << " [!] Generator: REVERSE from: " << (int) from << " to: " << (int) to << std::endl;
+          std::cout << " [!] Generator: REVERSE from: " << (int) from << " to: " << (int) to << " block size: " << (depth * 8) << std::endl;
           generate_reverse_range(conn, depth, to, from, blockData, on_generate);
         } else if (line == "random") {
-          std::cout << " [!] Generator: RANDOM from: " << (int) from << " to: " << (int) to << std::endl;
+          std::cout << " [!] Generator: RANDOM from: " << (int) from << " to: " << (int) to << " block size: " << (depth * 8) << std::endl;
           generate_random(conn, depth, from, to, blockData, on_generate);
         } else {
-          std::cout << " [!] Generator: FALLBACK (RANDOM) from: " << (int) from << " to: " << (int) to << std::endl;
+          std::cout << " [!] Generator: FALLBACK (RANDOM) from: " << (int) from << " to: " << (int) to << " block size: " << (depth * 8) << std::endl;
           generate_random(conn, depth, from, to, blockData, on_generate);
         }
         std::cout << " [!] Block " << blockHex << " processed" << std::endl;
