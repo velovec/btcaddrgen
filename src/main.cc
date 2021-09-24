@@ -149,8 +149,8 @@ int main(int argc, const char *argv[]) {
 
   std::cout << " [!] AMQP connection established" << std::endl;
 
-  // generate_random(conn, on_generate);
-  generate_direct(conn, 32, std::vector<uint8_t>(), on_generate);
+  generate_random(conn, on_generate);
+  // generate_direct(conn, 32, std::vector<uint8_t>(), on_generate);
   // generate_reverse(conn, 32, std::vector<uint8_t>(), on_generate);
 
   std::cout << " [+] AMQP payload sent" << std::endl;
