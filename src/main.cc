@@ -185,13 +185,13 @@ int main(int argc, const char *argv[]) {
   const char *reverse = "reverse";
   const char *random = "random";
 
-  if (generation_type == direct) {
+  if (*generation_type == *direct) {
     std::cout << " [!] Generator: DIRECT from: " << from << " to: " << to << std::endl;
     generate_direct_range(conn, 32, from, to, std::vector<uint8_t>(), on_generate);
-  } else if (generation_type == reverse) {
+  } else if (*generation_type == *reverse) {
     std::cout << " [!] Generator: REVERSE from: " << from << " to: " << to << std::endl;
     generate_reverse_range(conn, 32, to, from, std::vector<uint8_t>(), on_generate);
-  } else if (generation_type == random) {
+  } else if (*generation_type == *random) {
     std::cout << " [!] Generator: RANDOM" << std::endl;
     generate_random(conn, on_generate);
   } else {
