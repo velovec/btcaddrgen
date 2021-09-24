@@ -235,9 +235,10 @@ static void start_consuming(amqp_connection_state_t conn, amqp_bytes_t taskQueue
       std::string line;
 
       std::getline(messageBodyStream, line, ';');
-      std::string blockHex = line;
+      blockHex = std::move(line);
+
       std::vector<uint8_t> blockData;
-      if (!utils::ImportFromHexString(line, blockData)) {
+      if (!utils::ImportFromHexString(blockHex, blockData)) {
         ack = false;
       } else {
         std::getline(messageBodyStream, line, ';');
