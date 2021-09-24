@@ -182,17 +182,14 @@ int main(int argc, const char *argv[]) {
   std::cout << " [!] AMQP connection established" << std::endl;
   std::cout << " [!] Generator: " << generation_type << " from: " << from << " to: " << to << std::endl;
 
-  switch (generation_type) {
-    case "direct":
-      generate_direct_range(conn, 32, from, to, std::vector<uint8_t>(), on_generate);
-      break;
-    case "reverse":
-      generate_reverse_range(conn, 32, to, from, std::vector<uint8_t>(), on_generate);
-      break;
-    case "random":
-    default:
-      generate_random(conn, on_generate);
-      break;
+  if (generation_type == "direct") {
+    generate_direct_range(conn, 32, from, to, std::vector<uint8_t>(), on_generate);
+  } else if (generation_type == "reverse") {
+    generate_reverse_range(conn, 32, to, from, std::vector<uint8_t>(), on_generate);
+  } else if (generation_type == "random") {
+    generate_random(conn, on_generate);
+  } else {
+    generate_random(conn, on_generate);
   }
 
 
