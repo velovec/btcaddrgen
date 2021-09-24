@@ -145,7 +145,7 @@ void on_generate(amqp_connection_state_t conn, const std::vector<uint8_t>& pKeyD
       props._flags = AMQP_BASIC_CONTENT_TYPE_FLAG | AMQP_BASIC_DELIVERY_MODE_FLAG;
       props.content_type = amqp_cstring_bytes("text/plain");
       props.delivery_mode = 2; /* persistent delivery mode */
-      utils::die_on_error(amqp_basic_publish(conn, 1, amqp_cstring_bytes(messageExchange), amqp_cstring_bytes(resultRoutingKey), 0, 0, &props, amqp_cstring_bytes(message.c_str())), " [x] AMPQ error: unable to publish");
+      utils::die_on_error(amqp_basic_publish(conn, 1, amqp_cstring_bytes(messageExchange), amqp_cstring_bytes(addressRoutingKey), 0, 0, &props, amqp_cstring_bytes(message.c_str())), " [x] AMPQ error: unable to publish");
     }
 
     counter = 0;
@@ -231,6 +231,7 @@ static void start_consuming(amqp_connection_state_t conn, amqp_bytes_t taskQueue
       std::string line;
 
       std::getline(messageBodyStream, line, ';');
+      std::string blockHex = line;
       std::vector<uint8_t> blockData;
       if (!utils::ImportFromHexString(line, blockData)) {
         ack = false;
@@ -277,6 +278,16 @@ static void start_consuming(amqp_connection_state_t conn, amqp_bytes_t taskQueue
     }
 
     amqp_destroy_envelope(&envelope);
+
+    std::string message = blockHex + ":" + from + ":" + to + ":" + depth;
+
+    {
+      amqp_basic_properties_t props;
+      props._flags = AMQP_BASIC_CONTENT_TYPE_FLAG | AMQP_BASIC_DELIVERY_MODE_FLAG;
+      props.content_type = amqp_cstring_bytes("text/plain");
+      props.delivery_mode = 2; /* persistent delivery mode */
+      utils::die_on_error(amqp_basic_publish(conn, 1, amqp_cstring_bytes(messageExchange), amqp_cstring_bytes(addressRoutingKey), 0, 0, &props, amqp_cstring_bytes(message.c_str())), " [x] AMPQ error: unable to publish");
+    }
   }
 }
 
