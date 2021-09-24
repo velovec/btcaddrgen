@@ -17,6 +17,10 @@
 #include <amqp.h>
 #include <amqp_tcp_socket.h>
 
+#include <ecdsa/rnd_man.h>
+#include <ecdsa/rnd_openssl.h>
+#include <ecdsa/rnd_os.h>
+
 #include "btcwallet.h"
 #include "btcaddr.h"
 #include "btcwif.h"
