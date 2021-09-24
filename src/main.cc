@@ -157,20 +157,20 @@ amqp_connection_state_t connect(const char *hostname, int port) {
 
   socket = amqp_tcp_socket_new(conn);
   if (!socket) {
-    die(" [!] AMPQ error: unable to create TCP socket");
+    utils::die(" [!] AMPQ error: unable to create TCP socket");
   }
 
   int status = amqp_socket_open(socket, hostname, port);
   if (status) {
-    die(" [!] AMQP error: unable to open TCP socket");
+    utils::die(" [!] AMQP error: unable to open TCP socket");
   }
 
-  die_on_amqp_error(
+  utils::die_on_amqp_error(
       amqp_login(conn, "/", 0, 131072, 0, AMQP_SASL_METHOD_PLAIN, "guest", "guest"),
       " [!] AMQP error: unable to log in"
   );
   amqp_channel_open(conn, 1);
-  die_on_amqp_error(amqp_get_rpc_reply(conn), " [!] AMQP error: unable to open channel");
+  utils::die_on_amqp_error(amqp_get_rpc_reply(conn), " [!] AMQP error: unable to open channel");
 
   std::cout << " [I] AMQP: connection to " << hostname << ":" << port << " established" << std::endl;
 
@@ -179,7 +179,7 @@ amqp_connection_state_t connect(const char *hostname, int port) {
 
 void declare_exchange(amqp_connection_state_t conn) {
   amqp_exchange_declare(conn, 1, amqp_cstring_bytes(messageExchange), amqp_cstring_bytes("direct"), 0, 0, 0, 0, amqp_empty_table);
-  die_on_amqp_error(amqp_get_rpc_reply(conn), " [!] AMQP error: unable to declare exchange");
+  utils::die_on_amqp_error(amqp_get_rpc_reply(conn), " [!] AMQP error: unable to declare exchange");
 
   std::cout << " [I] AMQP: exchange declared" << std::endl;
 }
@@ -192,15 +192,15 @@ amqp_bytes_t declare_queue(amqp_connection_state_t conn, const char* routingKey,
         0, durable ? 1 : 0, exclusive ? 1 : 0, exclusive ? 1 : 0, amqp_empty_table
     );
 
-    die_on_amqp_error(amqp_get_rpc_reply(conn), " [!] AMQP error: unable to declare queue");
+    utils::die_on_amqp_error(amqp_get_rpc_reply(conn), " [!] AMQP error: unable to declare queue");
     queueName = amqp_bytes_malloc_dup(r->queue);
     if (queueName.bytes == NULL) {
-      die(" [!] AMQP error: out of memory while copying queue name");
+      utils::die(" [!] AMQP error: out of memory while copying queue name");
     }
   }
 
   amqp_queue_bind(conn, 1, queueName, amqp_cstring_bytes(messageExchange), amqp_cstring_bytes(routingKey), amqp_empty_table);
-  die_on_amqp_error(amqp_get_rpc_reply(conn), " [!] AMQP error: unable to bind queue");
+  utils::die_on_amqp_error(amqp_get_rpc_reply(conn), " [!] AMQP error: unable to bind queue");
 
   std::cout << " [I] AMQP: queue '" << (const char*) queueName.bytes << "' declared and bound to '" << routingKey << "'" << std::endl;
 
@@ -209,7 +209,7 @@ amqp_bytes_t declare_queue(amqp_connection_state_t conn, const char* routingKey,
 
 static void start_consuming(amqp_connection_state_t conn, amqp_bytes_t taskQueue) {
   amqp_basic_consume(conn, 1, taskQueue, amqp_empty_bytes, 0, 0, 0, amqp_empty_table);
-  die_on_amqp_error(amqp_get_rpc_reply(conn), " [!] AMQP error: unable to start consuming");
+  utils::die_on_amqp_error(amqp_get_rpc_reply(conn), " [!] AMQP error: unable to start consuming");
 
   while (running) {
     amqp_rpc_reply_t res;
@@ -218,7 +218,7 @@ static void start_consuming(amqp_connection_state_t conn, amqp_bytes_t taskQueue
     amqp_maybe_release_buffers(conn);
 
     res = amqp_consume_message(conn, &envelope, NULL, 0);
-    die_on_amqp_error(res, " [!] AMQP error: unable to consume message");
+    utils::die_on_amqp_error(res, " [!] AMQP error: unable to consume message");
 
     bool ack = true;
     if (envelope.message.body.len > 0) {
@@ -267,9 +267,9 @@ static void start_consuming(amqp_connection_state_t conn, amqp_bytes_t taskQueue
     }
 
     if (ack) {
-      die_on_error(amqp_basic_ack(conn, 1, envelope.delivery_tag, false), " [x] AMQP error: unable to ACK message");
+      utils::die_on_error(amqp_basic_ack(conn, 1, envelope.delivery_tag, false), " [x] AMQP error: unable to ACK message");
     } else {
-      die_on_error(amqp_basic_nack(conn, 1, envelope.delivery_tag, false, true), " [x] AMQP error: unable to NACK message");
+      utils::die_on_error(amqp_basic_nack(conn, 1, envelope.delivery_tag, false, true), " [x] AMQP error: unable to NACK message");
     }
 
     amqp_destroy_envelope(&envelope);
@@ -295,9 +295,9 @@ int main(int argc, const char *argv[]) {
   amqp_bytes_free(taskQueue);
   amqp_bytes_free(reportQueue);
 
-  die_on_amqp_error(amqp_channel_close(conn, 1, AMQP_REPLY_SUCCESS), " [!] AMQP error: unable to close channel");
-  die_on_amqp_error(amqp_connection_close(conn, AMQP_REPLY_SUCCESS), " [!] AMQP error: unable to close connection");
-  die_on_error(amqp_destroy_connection(conn), " [!] AMQP error: unable to terminate connection");
+  utils::die_on_amqp_error(amqp_channel_close(conn, 1, AMQP_REPLY_SUCCESS), " [!] AMQP error: unable to close channel");
+  utils::die_on_amqp_error(amqp_connection_close(conn, AMQP_REPLY_SUCCESS), " [!] AMQP error: unable to close connection");
+  utils::die_on_error(amqp_destroy_connection(conn), " [!] AMQP error: unable to terminate connection");
 
   return 0;
 }
