@@ -31,10 +31,7 @@ bool running = true;
 char const *exchange = "btc";
 char const *routingkey = "btc";
 
-amqp_socket_t *socket = NULL;
-amqp_connection_state_t conn;
-
-void generate_random(void (*callback)(const std::vector<uint8_t>&)) {
+void generate_random(amqp_connection_state_t conn, void (*callback)(amqp_connection_state_t conn, const std::vector<uint8_t>&)) {
   while (running) {
     btc::Wallet baseWallet = btc::Wallet::Generate();
     std::vector<uint8_t> baseKey = baseWallet.GetPrivateKeyData();
@@ -42,47 +39,47 @@ void generate_random(void (*callback)(const std::vector<uint8_t>&)) {
     for (uint8_t i = 0; i < 255; i++) {
       baseKey[baseKey.size() - 1] = i;
 
-      callback(baseKey);
+      callback(conn, baseKey);
     }
 
     baseKey[baseKey.size() - 1] = 255;
-    callback(baseKey);
+    callback(conn, baseKey);
   }
 }
 
-void generate_direct(int depth, std::vector<uint8_t> vector, void (*callback)(const std::vector<uint8_t>&)) {
+void generate_direct(amqp_connection_state_t conn, int depth, std::vector<uint8_t> vector, void (*callback)(amqp_connection_state_t conn, const std::vector<uint8_t>&)) {
   if (depth == 0) {
-    callback(vector);
+    callback(conn, );
     return;
   }
   vector.resize(33 - depth);
 
   for (int i = 0; i < 255; i++) {
     vector[vector.size() - 1] = i;
-    generate_direct(depth - 1, vector, callback);
+    generate_direct(conn, depth - 1, vector, callback);
   }
 
   vector[vector.size() - 1] = 255;
-  generate_direct(depth - 1, vector, callback);
+  generate_direct(conn, depth - 1, vector, callback);
 }
 
-void generate_reverse(int depth, std::vector<uint8_t> vector, void (*callback)(const std::vector<uint8_t>&)) {
+void generate_reverse(amqp_connection_state_t conn, int depth, std::vector<uint8_t> vector, void (*callback)(amqp_connection_state_t conn, const std::vector<uint8_t>&)) {
   if (depth == 0) {
-    callback(vector);
+    callback(conn, vector);
     return;
   }
   vector.resize(33 - depth);
 
   for (int i = 255; i > 0; i--) {
     vector[vector.size() - 1] = i;
-    generate_reverse(depth - 1, vector, callback);
+    generate_reverse(conn, depth - 1, vector, callback);
   }
 
   vector[vector.size() - 1] = 0;
-  generate_reverse(depth - 1, vector, callback);
+  generate_reverse(conn, depth - 1, vector, callback);
 }
 
-void on_generate(const std::vector<uint8_t>& pKeyData) {
+void on_generate(amqp_connection_state_t conn, const std::vector<uint8_t>& pKeyData) {
   std::shared_ptr<ecdsa::Key> pKey = std::make_shared<ecdsa::Key>(pKeyData);
 
   btc::Wallet wallet;
@@ -120,6 +117,9 @@ int main(int argc, const char *argv[]) {
   char const *hostname = std::getenv("AMQP_HOST");
   int port = 5672, status;
 
+  amqp_socket_t *socket = NULL;
+  amqp_connection_state_t conn;
+
   conn = amqp_new_connection();
 
   std::cout << " [I] AMQP: " << hostname << ":" << port << "/" << exchange << "@" << routingkey << std::endl;
@@ -149,9 +149,9 @@ int main(int argc, const char *argv[]) {
 
   std::cout << " [!] AMQP connection established" << std::endl;
 
-  // generate_random(on_generate);
-  generate_direct(32, std::vector<uint8_t>(), on_generate);
-  // generate_reverse(32, std::vector<uint8_t>(), on_generate);
+  // generate_random(conn, on_generate);
+  generate_direct(conn, 32, std::vector<uint8_t>(), on_generate);
+  // generate_reverse(conn, 32, std::vector<uint8_t>(), on_generate);
 
   std::cout << " [+] AMQP payload sent" << std::endl;
 
