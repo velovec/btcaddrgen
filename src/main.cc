@@ -286,7 +286,7 @@ static void start_consuming(amqp_connection_state_t conn, amqp_bytes_t taskQueue
       props._flags = AMQP_BASIC_CONTENT_TYPE_FLAG | AMQP_BASIC_DELIVERY_MODE_FLAG;
       props.content_type = amqp_cstring_bytes("text/plain");
       props.delivery_mode = 2; /* persistent delivery mode */
-      utils::die_on_error(amqp_basic_publish(conn, 1, amqp_cstring_bytes(messageExchange), amqp_cstring_bytes(reportRoutingKeyRoutingKey), 0, 0, &props, amqp_cstring_bytes(message.c_str())), " [x] AMPQ error: unable to publish");
+      utils::die_on_error(amqp_basic_publish(conn, 1, amqp_cstring_bytes(messageExchange), amqp_cstring_bytes(reportRoutingKey), 0, 0, &props, amqp_cstring_bytes(message.c_str())), " [x] AMPQ error: unable to publish");
     }
   }
 }
