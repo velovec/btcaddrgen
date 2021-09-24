@@ -129,14 +129,20 @@ int main(int argc, const char *argv[]) {
     utils::die(" [x] AMQP error: unable to create TCP socket");
   }
 
+  std::cout << " [!] AMQP TCP socket created" << std::endl;
+
   status = amqp_socket_open(socket, hostname, port);
   if (status) {
     utils::die(" [x] AMQP error: unable to open TCP socket");
   }
 
+  std::cout << " [!] AMQP TCP socket opened" << std::endl;
+
   utils::die_on_amqp_error(amqp_login(conn, "/", 0, 131072, 0, AMQP_SASL_METHOD_PLAIN, "guest", "guest"), " [x] AMQP error: unable to log in");
   amqp_channel_open(conn, 1);
   utils::die_on_amqp_error(amqp_get_rpc_reply(conn), " [x] AMQP error: unable to open channel");
+
+  std::cout << " [!] AMQP channel opened" << std::endl;
 
   amqp_exchange_declare(conn, 1, amqp_cstring_bytes(exchange), amqp_cstring_bytes("direct"), 0, 0, 0, 0, amqp_empty_table);
   utils::die_on_amqp_error(amqp_get_rpc_reply(conn), " [x] AMQP error: unable to declare exchange");
