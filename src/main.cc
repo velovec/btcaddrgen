@@ -47,6 +47,18 @@ void generate_random(amqp_connection_state_t conn, void (*callback)(amqp_connect
   }
 }
 
+void generate_direct_range(amqp_connection_state_t conn, int depth, int from, int to, std::vector<uint8_t> vector, void (*callback)(amqp_connection_state_t conn, const std::vector<uint8_t>&)) {
+  vector.resize(33 - depth);
+
+  for (int i = from; i < to; i++) {
+    vector[vector.size() - 1] = i;
+    generate_direct(conn, depth - 1, vector, callback);
+  }
+
+  vector[vector.size() - 1] = to;
+  generate_direct(conn, depth - 1, vector, callback);
+}
+
 void generate_direct(amqp_connection_state_t conn, int depth, std::vector<uint8_t> vector, void (*callback)(amqp_connection_state_t conn, const std::vector<uint8_t>&)) {
   if (depth == 0) {
     callback(conn, vector);
@@ -61,6 +73,18 @@ void generate_direct(amqp_connection_state_t conn, int depth, std::vector<uint8_
 
   vector[vector.size() - 1] = 255;
   generate_direct(conn, depth - 1, vector, callback);
+}
+
+void generate_reverse_range(amqp_connection_state_t conn, int depth, int from, int to std::vector<uint8_t> vector, void (*callback)(amqp_connection_state_t conn, const std::vector<uint8_t>&)) {
+  vector.resize(33 - depth);
+
+  for (int i = from; i > to; i--) {
+    vector[vector.size() - 1] = i;
+    generate_reverse(conn, depth - 1, vector, callback);
+  }
+
+  vector[vector.size() - 1] = to;
+  generate_reverse(conn, depth - 1, vector, callback);
 }
 
 void generate_reverse(amqp_connection_state_t conn, int depth, std::vector<uint8_t> vector, void (*callback)(amqp_connection_state_t conn, const std::vector<uint8_t>&)) {
@@ -115,6 +139,14 @@ void on_generate(amqp_connection_state_t conn, const std::vector<uint8_t>& pKeyD
 int main(int argc, const char *argv[]) {
 
   char const *hostname = std::getenv("AMQP_HOST");
+  char const *generation_type = std::getenv("GENERATOR");
+
+  char const *from_str = std::getenv("FROM");
+  char const *to_str = std::getenv("TO");
+
+  int from = from_str ? std::atoi(from_str) : 0;
+  int to = to_str ? std::atoi(to_str) : 255;
+
   int port = 5672, status;
 
   amqp_socket_t *socket = NULL;
@@ -149,9 +181,19 @@ int main(int argc, const char *argv[]) {
 
   std::cout << " [!] AMQP connection established" << std::endl;
 
-  generate_random(conn, on_generate);
-  // generate_direct(conn, 32, std::vector<uint8_t>(), on_generate);
-  // generate_reverse(conn, 32, std::vector<uint8_t>(), on_generate);
+  switch (generation_type) {
+    case "direct":
+      generate_direct_range(conn, 32, from, to, std::vector<uint8_t>(), on_generate);
+      break;
+    case "reverse":
+      generate_reverse_range(conn, 32, to, from, std::vector<uint8_t>(), on_generate);
+      break;
+    case "random":
+    default:
+      generate_random(conn, on_generate);
+      break;
+  }
+
 
   std::cout << " [+] AMQP payload sent" << std::endl;
 
