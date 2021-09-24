@@ -279,7 +279,7 @@ static void start_consuming(amqp_connection_state_t conn, amqp_bytes_t taskQueue
 
     amqp_destroy_envelope(&envelope);
 
-    std::string message = blockHex + ":" + from + ":" + to + ":" + depth;
+    std::string message = blockHex + ":" + std::to_string(from) + ":" + std::to_string(to) + ":" + std::to_string(depth);
 
     {
       amqp_basic_properties_t props;
