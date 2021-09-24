@@ -28,22 +28,35 @@ int counter = 0;
 std::string message = "";
 bool running = true;
 
-char const *exchange = "btc";
-char const *routingkey = "btc";
+char const *messageExchange = "btc";
 
-void generate_random(amqp_connection_state_t conn, void (*callback)(amqp_connection_state_t conn, const std::vector<uint8_t>&)) {
+char const *addressRoutingKey = "btc";
+char const *taskRoutingKey = "task";
+char const *reportRoutingKey = "report";
+
+void generate_random(amqp_connection_state_t conn, int depth, int from, int to, std::vector<uint8_t> vector, void (*callback)(amqp_connection_state_t conn, const std::vector<uint8_t>&)) {
   while (running) {
-    btc::Wallet baseWallet = btc::Wallet::Generate();
-    std::vector<uint8_t> baseKey = baseWallet.GetPrivateKeyData();
+    std::vector<uint8_t> rnd;
+    rnd.resize(depth - 1);
 
-    for (uint8_t i = 0; i < 255; i++) {
-      baseKey[baseKey.size() - 1] = i;
+    rnd::RandManager rnd_man(depth - 1);
+    rnd_man.Begin();
+    rnd_man.Rand<rnd::Rand_OpenSSL<128>>();
+    rnd_man.Rand<rnd::Rand_OS>();
+    rnd = rnd_man.End();
 
-      callback(conn, baseKey);
+    for (int i = 0; i < depth; i++) {
+      vector.push_back(rnd.at(i));
     }
 
-    baseKey[baseKey.size() - 1] = 255;
-    callback(conn, baseKey);
+    for (uint8_t i = 0; i < 255; i++) {
+      vector[vector.size() - 1] = i;
+
+      callback(conn, vector);
+    }
+
+    vector[vector.size() - 1] = 255;
+    callback(conn, vector);
   }
 }
 
@@ -128,7 +141,7 @@ void on_generate(amqp_connection_state_t conn, const std::vector<uint8_t>& pKeyD
       props._flags = AMQP_BASIC_CONTENT_TYPE_FLAG | AMQP_BASIC_DELIVERY_MODE_FLAG;
       props.content_type = amqp_cstring_bytes("text/plain");
       props.delivery_mode = 2; /* persistent delivery mode */
-      utils::die_on_error(amqp_basic_publish(conn, 1, amqp_cstring_bytes(exchange), amqp_cstring_bytes(routingkey), 0, 0, &props, amqp_cstring_bytes(message.c_str())), " [x] AMPQ error: unable to publish");
+      utils::die_on_error(amqp_basic_publish(conn, 1, amqp_cstring_bytes(messageExchange), amqp_cstring_bytes(resultRoutingKey), 0, 0, &props, amqp_cstring_bytes(message.c_str())), " [x] AMPQ error: unable to publish");
     }
 
     counter = 0;
@@ -136,75 +149,155 @@ void on_generate(amqp_connection_state_t conn, const std::vector<uint8_t>& pKeyD
   }
 }
 
-int main(int argc, const char *argv[]) {
-
-  char const *hostname = std::getenv("AMQP_HOST");
-  char const *generation_type = std::getenv("GENERATOR");
-
-  char const *from_str = std::getenv("FROM");
-  char const *to_str = std::getenv("TO");
-
-  int from = from_str ? std::atoi(from_str) : 0;
-  int to = to_str ? std::atoi(to_str) : 255;
-
-  int port = 5672, status;
-
+amqp_connection_state_t connect(const char *hostname, int port) {
   amqp_socket_t *socket = NULL;
   amqp_connection_state_t conn;
 
   conn = amqp_new_connection();
 
-  std::cout << " [I] AMQP: " << hostname << ":" << port << "/" << exchange << "@" << routingkey << std::endl;
-
   socket = amqp_tcp_socket_new(conn);
   if (!socket) {
-    utils::die(" [x] AMQP error: unable to create TCP socket");
+    die(" [!] AMPQ error: unable to create TCP socket");
   }
 
-  std::cout << " [!] AMQP TCP socket created" << std::endl;
-
-  status = amqp_socket_open(socket, hostname, port);
+  int status = amqp_socket_open(socket, hostname, port);
   if (status) {
-    utils::die(" [x] AMQP error: unable to open TCP socket");
+    die(" [!] AMQP error: unable to open TCP socket");
   }
 
-  std::cout << " [!] AMQP TCP socket opened" << std::endl;
-
-  utils::die_on_amqp_error(amqp_login(conn, "/", 0, 131072, 0, AMQP_SASL_METHOD_PLAIN, "guest", "guest"), " [x] AMQP error: unable to log in");
+  die_on_amqp_error(
+      amqp_login(conn, "/", 0, 131072, 0, AMQP_SASL_METHOD_PLAIN, "guest", "guest"),
+      " [!] AMQP error: unable to log in"
+  );
   amqp_channel_open(conn, 1);
-  utils::die_on_amqp_error(amqp_get_rpc_reply(conn), " [x] AMQP error: unable to open channel");
+  die_on_amqp_error(amqp_get_rpc_reply(conn), " [!] AMQP error: unable to open channel");
 
-  std::cout << " [!] AMQP channel opened" << std::endl;
+  std::cout << " [I] AMQP: connection to " << hostname << ":" << port << " established" << std::endl;
 
-  amqp_exchange_declare(conn, 1, amqp_cstring_bytes(exchange), amqp_cstring_bytes("direct"), 0, 0, 0, 0, amqp_empty_table);
-  utils::die_on_amqp_error(amqp_get_rpc_reply(conn), " [x] AMQP error: unable to declare exchange");
+  return conn;
+}
 
-  std::cout << " [!] AMQP connection established" << std::endl;
+void declare_exchange(amqp_connection_state_t conn) {
+  amqp_exchange_declare(conn, 1, amqp_cstring_bytes(messageExchange), amqp_cstring_bytes("direct"), 0, 0, 0, 0, amqp_empty_table);
+  die_on_amqp_error(amqp_get_rpc_reply(conn), " [!] AMQP error: unable to declare exchange");
 
-  const char *direct = "direct";
-  const char *reverse = "reverse";
-  const char *random = "random";
+  std::cout << " [I] AMQP: exchange declared" << std::endl;
+}
 
-  if (*generation_type == *direct) {
-    std::cout << " [!] Generator: DIRECT from: " << from << " to: " << to << std::endl;
-    generate_direct_range(conn, 32, from, to, std::vector<uint8_t>(), on_generate);
-  } else if (*generation_type == *reverse) {
-    std::cout << " [!] Generator: REVERSE from: " << from << " to: " << to << std::endl;
-    generate_reverse_range(conn, 32, to, from, std::vector<uint8_t>(), on_generate);
-  } else if (*generation_type == *random) {
-    std::cout << " [!] Generator: RANDOM" << std::endl;
-    generate_random(conn, on_generate);
-  } else {
-    std::cout << " [!] Generator: FALLBACK (RANDOM)" << std::endl;
-    generate_random(conn, on_generate);
+amqp_bytes_t declare_queue(amqp_connection_state_t conn, const char* routingKey, bool exclusive, bool durable) {
+  amqp_bytes_t queueName;
+  {
+    amqp_queue_declare_ok_t *r = amqp_queue_declare(
+        conn, 1, exclusive ? amqp_empty_bytes : amqp_cstring_bytes(routingKey),
+        0, durable ? 1 : 0, exclusive ? 1 : 0, exclusive ? 1 : 0, amqp_empty_table
+    );
+
+    die_on_amqp_error(amqp_get_rpc_reply(conn), " [!] AMQP error: unable to declare queue");
+    queueName = amqp_bytes_malloc_dup(r->queue);
+    if (queueName.bytes == NULL) {
+      die(" [!] AMQP error: out of memory while copying queue name");
+    }
   }
 
+  amqp_queue_bind(conn, 1, queueName, amqp_cstring_bytes(messageExchange), amqp_cstring_bytes(routingKey), amqp_empty_table);
+  die_on_amqp_error(amqp_get_rpc_reply(conn), " [!] AMQP error: unable to bind queue");
 
-  std::cout << " [+] AMQP payload sent" << std::endl;
+  std::cout << " [I] AMQP: queue '" << (const char*) queueName.bytes << "' declared and bound to '" << routingKey << "'" << std::endl;
 
-  utils::die_on_amqp_error(amqp_channel_close(conn, 1, AMQP_REPLY_SUCCESS), " [x] AMQP error: unable to close channel");
-  utils::die_on_amqp_error(amqp_connection_close(conn, AMQP_REPLY_SUCCESS), " [x] AMQP error: unable to close connection");
-  utils::die_on_error(amqp_destroy_connection(conn), " [x] AMQP error: unable to destroy connection");
+  return queueName;
+}
+
+static void start_consuming(amqp_connection_state_t conn, amqp_bytes_t taskQueue) {
+  amqp_basic_consume(conn, 1, taskQueue, amqp_empty_bytes, 0, 0, 0, amqp_empty_table);
+  die_on_amqp_error(amqp_get_rpc_reply(conn), " [!] AMQP error: unable to start consuming");
+
+  while (running) {
+    amqp_rpc_reply_t res;
+    amqp_envelope_t envelope;
+
+    amqp_maybe_release_buffers(conn);
+
+    res = amqp_consume_message(conn, &envelope, NULL, 0);
+    die_on_amqp_error(res, " [!] AMQP error: unable to consume message");
+
+    bool ack = true;
+    if (envelope.message.body.len > 0) {
+      char* messageBody = (char *) envelope.message.body.bytes;
+      std::stringstream messageBodyStream(messageBody);
+      std::string line;
+
+      std::getline(messageBodyStream, line, ';');
+      std::vector<uint8_t> blockData;
+      if (!utils::ImportFromHexString(line, blockData)) {
+        ack = false;
+      } else {
+        std::cout << " [!] Got new block: " << line << std::endl;
+
+        std::getline(messageBodyStream, line, ';');
+        uint8_t from = std::stoul(line);
+
+        std::getline(messageBodyStream, line, ';');
+        uint8_t to = std::stoul(line);
+
+        std::getline(messageBodyStream, line, ';');
+        int depth = std::stoi(line);
+
+        std::getline(messageBodyStream, line, ';');
+
+        const char *direct = "direct";
+        const char *reverse = "reverse";
+        const char *random = "random";
+
+        if (line.c_str() == *direct) {
+          std::cout << " [!] Generator: DIRECT from: " << from << " to: " << to << std::endl;
+          generate_direct_range(conn, depth, from, to, blockData, on_generate);
+        } else if (line.c_str() == *reverse) {
+          std::cout << " [!] Generator: REVERSE from: " << from << " to: " << to << std::endl;
+          generate_reverse_range(conn, depth, to, from, blockData, on_generate);
+        } else if (line.c_str() == *random) {
+          std::cout << " [!] Generator: RANDOM" << std::endl;
+          generate_random(conn, depth, from, to, blockData, on_generate);
+        } else {
+          std::cout << " [!] Generator: FALLBACK (RANDOM)" << std::endl;
+          generate_random(conn, depth, from, to, blockData, on_generate);
+        }
+      }
+    } else {
+      std::cout << " [!] AMQP warning: empty message" << std::endl;
+    }
+
+    if (ack) {
+      die_on_error(amqp_basic_ack(conn, 1, envelope.delivery_tag, false), " [x] AMQP error: unable to ACK message");
+    } else {
+      die_on_error(amqp_basic_nack(conn, 1, envelope.delivery_tag, false, true), " [x] AMQP error: unable to NACK message");
+    }
+
+    amqp_destroy_envelope(&envelope);
+  }
+}
+
+int main(int argc, const char *argv[]) {
+
+  char const *hostname = std::getenv("AMQP_HOST");
+
+  // Connect AMQP
+  amqp_connection_state_t conn = connect(hostname, 5672);
+  declare_exchange(conn);
+
+  amqp_bytes_t addressQueue = declare_queue(conn, addressRoutingKey, false, false);
+  amqp_bytes_t taskQueue = declare_queue(conn, taskRoutingKey, false, false);
+  amqp_bytes_t reportQueue = declare_queue(conn, reportRoutingKey, false, true);
+
+  start_consuming(conn, taskQueue);
+
+  // Cleanup
+  amqp_bytes_free(addressQueue);
+  amqp_bytes_free(taskQueue);
+  amqp_bytes_free(reportQueue);
+
+  die_on_amqp_error(amqp_channel_close(conn, 1, AMQP_REPLY_SUCCESS), " [!] AMQP error: unable to close channel");
+  die_on_amqp_error(amqp_connection_close(conn, AMQP_REPLY_SUCCESS), " [!] AMQP error: unable to close connection");
+  die_on_error(amqp_destroy_connection(conn), " [!] AMQP error: unable to terminate connection");
 
   return 0;
 }
