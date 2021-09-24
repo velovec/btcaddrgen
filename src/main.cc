@@ -91,7 +91,7 @@ void generate_reverse(amqp_connection_state_t conn, int depth, std::vector<uint8
   generate_reverse(conn, depth - 1, vector, callback);
 }
 
-void generate_reverse_range(amqp_connection_state_t conn, int depth, int from, int to std::vector<uint8_t> vector, void (*callback)(amqp_connection_state_t conn, const std::vector<uint8_t>&)) {
+void generate_reverse_range(amqp_connection_state_t conn, int depth, int from, int to, std::vector<uint8_t> vector, void (*callback)(amqp_connection_state_t conn, const std::vector<uint8_t>&)) {
   vector.resize(33 - depth);
 
   for (int i = from; i > to; i--) {
