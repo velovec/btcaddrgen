@@ -25,10 +25,10 @@ namespace btc {
     std::string GetPrivateKey();
     void ShowPrivateKeyInfo();
 
-   private:
     void SetPrivateKey(std::shared_ptr<ecdsa::Key> privateKey);
-
     Wallet() {};
+
+   private:
 
     std::shared_ptr<ecdsa::Key> privateKey;
   };
