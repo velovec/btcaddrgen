@@ -183,7 +183,7 @@ int main(int argc, const char *argv[]) {
 
   const char *direct = "direct";
   const char *reverse = "reverse";
-  const char *random = "random"
+  const char *random = "random";
 
   if (std::string::compare(generation_type, direct) == 0) {
     std::cout << " [!] Generator: DIRECT from: " << from << " to: " << to << std::endl;
