@@ -224,6 +224,10 @@ static void start_consuming(amqp_connection_state_t conn, amqp_bytes_t taskQueue
     res = amqp_consume_message(conn, &envelope, NULL, 0);
     utils::die_on_amqp_error(res, " [!] AMQP error: unable to consume message");
 
+    std::string blockHex;
+    uint8_t from, to;
+    int depth;
+
     bool ack = true;
     if (envelope.message.body.len > 0) {
       char* messageBody = (char *) envelope.message.body.bytes;
@@ -239,27 +243,23 @@ static void start_consuming(amqp_connection_state_t conn, amqp_bytes_t taskQueue
         std::cout << " [!] Got new block: " << line << std::endl;
 
         std::getline(messageBodyStream, line, ';');
-        uint8_t from = std::stoul(line);
+        from = std::stoul(line);
 
         std::getline(messageBodyStream, line, ';');
-        uint8_t to = std::stoul(line);
+        to = std::stoul(line);
 
         std::getline(messageBodyStream, line, ';');
-        int depth = std::stoi(line);
+        depth = std::stoi(line);
 
         std::getline(messageBodyStream, line, ';');
 
-        const char *direct = "direct";
-        const char *reverse = "reverse";
-        const char *random = "random";
-
-        if (line.c_str() == *direct) {
+        if (line == "direct") {
           std::cout << " [!] Generator: DIRECT from: " << from << " to: " << to << std::endl;
           generate_direct_range(conn, depth, from, to, blockData, on_generate);
-        } else if (line.c_str() == *reverse) {
+        } else if (line == "reverse") {
           std::cout << " [!] Generator: REVERSE from: " << from << " to: " << to << std::endl;
           generate_reverse_range(conn, depth, to, from, blockData, on_generate);
-        } else if (line.c_str() == *random) {
+        } else if (line == "random") {
           std::cout << " [!] Generator: RANDOM" << std::endl;
           generate_random(conn, depth, from, to, blockData, on_generate);
         } else {
