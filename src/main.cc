@@ -188,10 +188,10 @@ int main(int argc, const char *argv[]) {
     std::cout << " [!] Generator: REVERSE from: " << from << " to: " << to << std::endl;
     generate_reverse_range(conn, 32, to, from, std::vector<uint8_t>(), on_generate);
   } else if (generation_type == "random") {
-    std::cout << " [!] Generator: RANDOM from: " << from << " to: " << to << std::endl;
+    std::cout << " [!] Generator: RANDOM" << std::endl;
     generate_random(conn, on_generate);
   } else {
-    std::cout << " [!] Generator: FALLBACK (RANDOM) from: " << from << " to: " << to << std::endl;
+    std::cout << " [!] Generator: FALLBACK (RANDOM)" << std::endl;
     generate_random(conn, on_generate);
   }
 
