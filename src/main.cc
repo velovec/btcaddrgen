@@ -22,7 +22,7 @@
 #include "btcwif.h"
 #include "utils.h"
 
-#define KEYS_PER_MESSAGE 256
+#define KEYS_PER_MESSAGE 200
 
 int counter = 0;
 std::string message = "";
