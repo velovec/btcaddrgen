@@ -49,7 +49,7 @@ void generate_random(amqp_connection_state_t conn, void (*callback)(amqp_connect
 
 void generate_direct(amqp_connection_state_t conn, int depth, std::vector<uint8_t> vector, void (*callback)(amqp_connection_state_t conn, const std::vector<uint8_t>&)) {
   if (depth == 0) {
-    callback(conn, );
+    callback(conn, vector);
     return;
   }
   vector.resize(33 - depth);
