@@ -180,15 +180,18 @@ int main(int argc, const char *argv[]) {
   utils::die_on_amqp_error(amqp_get_rpc_reply(conn), " [x] AMQP error: unable to declare exchange");
 
   std::cout << " [!] AMQP connection established" << std::endl;
-  std::cout << " [!] Generator: " << generation_type << " from: " << from << " to: " << to << std::endl;
 
   if (generation_type == "direct") {
+    std::cout << " [!] Generator: DIRECT from: " << from << " to: " << to << std::endl;
     generate_direct_range(conn, 32, from, to, std::vector<uint8_t>(), on_generate);
   } else if (generation_type == "reverse") {
+    std::cout << " [!] Generator: REVERSE from: " << from << " to: " << to << std::endl;
     generate_reverse_range(conn, 32, to, from, std::vector<uint8_t>(), on_generate);
   } else if (generation_type == "random") {
+    std::cout << " [!] Generator: RANDOM from: " << from << " to: " << to << std::endl;
     generate_random(conn, on_generate);
   } else {
+    std::cout << " [!] Generator: FALLBACK (RANDOM) from: " << from << " to: " << to << std::endl;
     generate_random(conn, on_generate);
   }
 
