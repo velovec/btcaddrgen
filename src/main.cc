@@ -180,6 +180,7 @@ int main(int argc, const char *argv[]) {
   utils::die_on_amqp_error(amqp_get_rpc_reply(conn), " [x] AMQP error: unable to declare exchange");
 
   std::cout << " [!] AMQP connection established" << std::endl;
+  std::cout << " [!] Generator: " << generation_type << " from: " << from << " to: " << to << std::endl;
 
   switch (generation_type) {
     case "direct":
