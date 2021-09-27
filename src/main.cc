@@ -286,16 +286,16 @@ static void start_consuming(amqp_connection_state_t conn, amqp_bytes_t taskQueue
         props.delivery_mode = 2; /* persistent delivery mode */
         utils::die_on_error(amqp_basic_publish(conn, 1, amqp_cstring_bytes(messageExchange), amqp_cstring_bytes(reportRoutingKey), 0, 0, &props, amqp_cstring_bytes(message.c_str())), " [x] AMPQ error: unable to publish");
       }
-
-      std::cout << " [!] Report sent" << std::endl;
     } else {
       std::cout << " [!] AMQP warning: empty message" << std::endl;
     }
 
     if (ack) {
       utils::die_on_error(amqp_basic_ack(conn, 1, envelope.delivery_tag, false), " [x] AMQP error: unable to ACK message");
+      std::cout << " [!] Block confirmed" << std::endl;
     } else {
       utils::die_on_error(amqp_basic_nack(conn, 1, envelope.delivery_tag, false, true), " [x] AMQP error: unable to NACK message");
+      std::cout << " [!] Block NOT confirmed" << std::endl;
     }
 
     amqp_destroy_envelope(&envelope);
