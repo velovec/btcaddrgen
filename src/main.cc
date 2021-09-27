@@ -247,7 +247,7 @@ static void start_consuming(amqp_connection_state_t conn, amqp_bytes_t taskQueue
 
       std::vector<uint8_t> blockData;
       if (!utils::ImportFromHexString(blockHex, blockData)) {
-        std::cout << " [!] Invalid task: " << (char *) envelope.message.body.bytes << std::endl;
+        std::cout << " [!] Invalid block HEX: '" << blockHex << "'" << std::endl;
 
         ack = false;
       } else {
