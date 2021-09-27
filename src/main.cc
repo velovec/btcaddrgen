@@ -276,6 +276,16 @@ static void start_consuming(amqp_connection_state_t conn, amqp_bytes_t taskQueue
         }
         std::cout << " [!] Block " << blockHex << " processed" << std::endl;
       }
+
+      std::string message = blockHex + ":" + std::to_string(from) + ":" + std::to_string(to) + ":" + std::to_string(depth);
+
+      {
+        amqp_basic_properties_t props;
+        props._flags = AMQP_BASIC_CONTENT_TYPE_FLAG | AMQP_BASIC_DELIVERY_MODE_FLAG;
+        props.content_type = amqp_cstring_bytes("text/plain");
+        props.delivery_mode = 2; /* persistent delivery mode */
+        utils::die_on_error(amqp_basic_publish(conn, 1, amqp_cstring_bytes(messageExchange), amqp_cstring_bytes(reportRoutingKey), 0, 0, &props, amqp_cstring_bytes(message.c_str())), " [x] AMPQ error: unable to publish");
+      }
     } else {
       std::cout << " [!] AMQP warning: empty message" << std::endl;
     }
@@ -287,16 +297,6 @@ static void start_consuming(amqp_connection_state_t conn, amqp_bytes_t taskQueue
     }
 
     amqp_destroy_envelope(&envelope);
-
-    std::string message = blockHex + ":" + std::to_string(from) + ":" + std::to_string(to) + ":" + std::to_string(depth);
-
-    {
-      amqp_basic_properties_t props;
-      props._flags = AMQP_BASIC_CONTENT_TYPE_FLAG | AMQP_BASIC_DELIVERY_MODE_FLAG;
-      props.content_type = amqp_cstring_bytes("text/plain");
-      props.delivery_mode = 2; /* persistent delivery mode */
-      utils::die_on_error(amqp_basic_publish(conn, 1, amqp_cstring_bytes(messageExchange), amqp_cstring_bytes(reportRoutingKey), 0, 0, &props, amqp_cstring_bytes(message.c_str())), " [x] AMPQ error: unable to publish");
-    }
   }
 }
 
