@@ -64,7 +64,7 @@ void generate_random(amqp_connection_state_t conn, int depth, int from, int to, 
   }
 }
 
-void generate_direct(amqp_connection_state_t conn, int depth, std::vector<uint8_t> vector, void (*callback)(amqp_connection_state_t conn, const std::vector<uint8_t>&)) {
+void generate_direct(amqp_connection_state_t conn, int depth, std::vector<uint8_t> vector, void (*callback)(amqp_connection_state_t conn, const std::vector<uint8_t>&, bool)) {
   if (depth == 0) {
     callback(conn, vector, last);
     return;
