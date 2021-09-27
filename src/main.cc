@@ -38,7 +38,7 @@ char const *addressRoutingKey = "btc_test";
 char const *taskRoutingKey = "task";
 char const *reportRoutingKey = "report";
 
-void generate_random(amqp_connection_state_t conn, int depth, int from, int to, std::vector<uint8_t> vector, void (*callback)(amqp_connection_state_t conn, const std::vector<uint8_t>&)) {
+void generate_random(amqp_connection_state_t conn, int depth, int from, int to, std::vector<uint8_t> vector, void (*callback)(amqp_connection_state_t conn, const std::vector<uint8_t>&, bool)) {
   while (running) {
     std::vector<uint8_t> rnd;
     rnd.resize(depth - 1);
@@ -56,79 +56,79 @@ void generate_random(amqp_connection_state_t conn, int depth, int from, int to, 
     for (uint8_t i = 0; i < 255; i++) {
       vector[vector.size() - 1] = i;
 
-      callback(conn, vector);
+      callback(conn, vector, false);
     }
 
     vector[vector.size() - 1] = 255;
-    callback(conn, vector);
+    callback(conn, vector, false);
   }
 }
 
 void generate_direct(amqp_connection_state_t conn, int depth, std::vector<uint8_t> vector, void (*callback)(amqp_connection_state_t conn, const std::vector<uint8_t>&)) {
   if (depth == 0) {
-    callback(conn, vector);
+    callback(conn, vector, last);
     return;
   }
   vector.resize(33 - depth);
 
   for (int i = 0; i < 255; i++) {
     vector[vector.size() - 1] = i;
-    generate_direct(conn, depth - 1, vector, callback);
+    generate_direct(conn, depth - 1, vector, callback, false);
   }
 
   vector[vector.size() - 1] = 255;
-  generate_direct(conn, depth - 1, vector, callback);
+  generate_direct(conn, depth - 1, vector, callback, last);
 }
 
-void generate_direct_range(amqp_connection_state_t conn, int depth, int from, int to, std::vector<uint8_t> vector, void (*callback)(amqp_connection_state_t conn, const std::vector<uint8_t>&)) {
+void generate_direct_range(amqp_connection_state_t conn, int depth, int from, int to, std::vector<uint8_t> vector, void (*callback)(amqp_connection_state_t conn, const std::vector<uint8_t>&, bool), bool last) {
   if (depth == 0) {
-    callback(conn, vector);
+    callback(conn, vector, true);
     return;
   }
   vector.resize(33 - depth);
 
   for (int i = from; i < to; i++) {
     vector[vector.size() - 1] = i;
-    generate_direct(conn, depth - 1, vector, callback);
+    generate_direct(conn, depth - 1, vector, callback, false);
   }
 
   vector[vector.size() - 1] = to;
-  generate_direct(conn, depth - 1, vector, callback);
+  generate_direct(conn, depth - 1, vector, callback, last);
 }
 
-void generate_reverse(amqp_connection_state_t conn, int depth, std::vector<uint8_t> vector, void (*callback)(amqp_connection_state_t conn, const std::vector<uint8_t>&)) {
+void generate_reverse(amqp_connection_state_t conn, int depth, std::vector<uint8_t> vector, void (*callback)(amqp_connection_state_t conn, const std::vector<uint8_t>&, bool), bool last) {
   if (depth == 0) {
-    callback(conn, vector);
+    callback(conn, vector, last);
     return;
   }
   vector.resize(33 - depth);
 
   for (int i = 255; i > 0; i--) {
     vector[vector.size() - 1] = i;
-    generate_reverse(conn, depth - 1, vector, callback);
+    generate_reverse(conn, depth - 1, vector, callback, false);
   }
 
   vector[vector.size() - 1] = 0;
-  generate_reverse(conn, depth - 1, vector, callback);
+  generate_reverse(conn, depth - 1, vector, callback, last);
 }
 
-void generate_reverse_range(amqp_connection_state_t conn, int depth, int from, int to, std::vector<uint8_t> vector, void (*callback)(amqp_connection_state_t conn, const std::vector<uint8_t>&)) {
+void generate_reverse_range(amqp_connection_state_t conn, int depth, int from, int to, std::vector<uint8_t> vector, void (*callback)(amqp_connection_state_t conn, const std::vector<uint8_t>&, bool)) {
   if (depth == 0) {
-    callback(conn, vector);
+    callback(conn, vector, true);
     return;
   }
   vector.resize(33 - depth);
 
   for (int i = from; i > to; i--) {
     vector[vector.size() - 1] = i;
-    generate_reverse(conn, depth - 1, vector, callback);
+    generate_reverse(conn, depth - 1, vector, callback, false);
   }
 
   vector[vector.size() - 1] = to;
-  generate_reverse(conn, depth - 1, vector, callback);
+  generate_reverse(conn, depth - 1, vector, callback, true);
 }
 
-void on_generate(amqp_connection_state_t conn, const std::vector<uint8_t>& pKeyData) {
+void on_generate(amqp_connection_state_t conn, const std::vector<uint8_t>& pKeyData, bool last) {
   std::shared_ptr<ecdsa::Key> pKey = std::make_shared<ecdsa::Key>(pKeyData);
 
   btc::Wallet wallet;
@@ -147,7 +147,7 @@ void on_generate(amqp_connection_state_t conn, const std::vector<uint8_t>& pKeyD
 
   counter++;
 
-  if (counter == KEYS_PER_MESSAGE - 1) {
+  if ((counter == KEYS_PER_MESSAGE - 1) || last) {
     {
       amqp_basic_properties_t props;
       props._flags = AMQP_BASIC_CONTENT_TYPE_FLAG | AMQP_BASIC_DELIVERY_MODE_FLAG;
