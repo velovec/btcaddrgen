@@ -107,7 +107,7 @@ bool ImportFromHexString(const std::string &hex_str, std::vector<uint8_t> &out_d
     int val;
     hex_ss << std::hex << hex1;
     hex_ss >> val;
-    out_data[size - i - 1] = val;
+    out_data[i] = val;
   }
   return true;
 }
