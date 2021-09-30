@@ -34,7 +34,7 @@ bool running = true;
 
 char const *messageExchange = "btc";
 
-char const *addressRoutingKey = "btc_test";
+char const *addressRoutingKey = "btc";
 char const *taskRoutingKey = "task";
 char const *reportRoutingKey = "report";
 
