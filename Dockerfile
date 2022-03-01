@@ -21,6 +21,12 @@ RUN cmake .. && make && make install
 RUN ln -s /usr/local/lib/libsecp256k1.so.0.0.0 /lib/x86_64-linux-gnu/libsecp256k1.so.0
 RUN mkdir /src/btcaddrgen
 
+WORKDIR "/src"
+RUN git clone https://github.com/velovec/libbloom
+WORKDIR "/src/libbloom"
+RUN cmake . && make
+
+
 COPY . /src/btcaddrgen/
 WORKDIR "/src/btcaddrgen"
 

@@ -22,4 +22,4 @@ file(GLOB src "./src/*.cc")
 
 add_executable(btcaddrgen ${src} src/btcwallet.h)
 
-target_link_libraries(btcaddrgen ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES} ${ECDSAXX} ${Rabbitmqc_LIBRARY} "/home/velovec/CLionProjects/libbloom/build/libbloom.so.1.6")
+target_link_libraries(btcaddrgen ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES} ${ECDSAXX} ${Rabbitmqc_LIBRARY} "/src/libbloom/build/libbloom.so.1.6")
