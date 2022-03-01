@@ -2,7 +2,7 @@ FROM ubuntu:20.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && \
-    apt-get -qy install cmake make build-essential libboost-dev \
+    apt-get -qy install cmake make build-essential libboost-dev libbloom-dev \
         libboost-program-options-dev libssl-dev libtool git librabbitmq-dev && \
     mkdir /src
 
