@@ -31,4 +31,6 @@ WORKDIR "/src/btcaddrgen"
 
 RUN cmake . && make
 
+VOLUME ["/bloom_data"]
+
 ENTRYPOINT "/src/btcaddrgen/btcaddrgen"

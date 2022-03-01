@@ -203,9 +203,9 @@ int main(int argc, const char *argv[]) {
   }
 
   cout << "Loading bloom filters..." << endl;
-  bloom_load(&bloom1, "./bloom.1.data");
-  bloom_load(&bloom2, "./bloom.2.data");
-  bloom_load(&bloom3, "./bloom.3.data");
+  bloom_load(&bloom1, "/bloom_data/bloom.1.data");
+  bloom_load(&bloom2, "/bloom_data/bloom.2.data");
+  bloom_load(&bloom3, "/bloom_data/bloom.3.data");
   cout << "Bloom filter loaded" << endl;
 
   // Connect AMQP
