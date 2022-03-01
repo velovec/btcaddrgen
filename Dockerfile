@@ -24,8 +24,7 @@ RUN mkdir /src/btcaddrgen
 WORKDIR "/src"
 RUN git clone https://github.com/velovec/libbloom
 WORKDIR "/src/libbloom"
-RUN cmake . && make
-
+RUN make
 
 COPY . /src/btcaddrgen/
 WORKDIR "/src/btcaddrgen"
