@@ -36,7 +36,7 @@ pipeline {
 
     post {
         always {
-            sh 'docker rmi $(docker images | grep btcaddrgen:latest | awk \'{ print $3 }\')'
+            sh 'docker rmi $(docker images | grep btcaddrgen | awk \'{ print $3 }\')'
 
             deleteDir()
         }
