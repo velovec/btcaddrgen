@@ -36,8 +36,8 @@ pipeline {
 
     post {
         always {
-            sh 'docker rmi $(docker images | grep btcaddrgen | awk \'{ print $3 }\')'
-            sh 'docker rmi $(docker images -f dangling=true -q)'
+            sh 'docker rmi $(docker images | grep btcaddrgen | awk \'{ print $3 }\') || echo "No previous images for btcaddrgen"'
+            sh 'docker rmi $(docker images -f dangling=true -q) || echo "No dangling images"'
 
             deleteDir()
         }
