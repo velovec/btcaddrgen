@@ -49,3 +49,6 @@ CMakeTools
 *.exe
 *.out
 *.app
+
+.idea
+cmake-build-release

@@ -11,6 +11,7 @@
 
 #include <amqp.h>
 #include <amqp_tcp_socket.h>
+#include <fstream>
 
 #include "btcwallet.h"
 #include "btcaddr.h"
@@ -190,22 +191,70 @@ amqp_bytes_t declare_queue(amqp_connection_state_t conn, const char* routingKey,
   return queueName;
 }
 
+struct bloom_metadata {
+  string bloom1_name;
+  long long bloom1_size;
+
+  string bloom2_name;
+  long long bloom2_size;
+
+  string bloom3_name;
+  long long bloom3_size;
+};
+
+bloom_metadata read_metadata(const char* filename) {
+  struct bloom_metadata b;
+  std::ifstream infile(filename);
+
+  const string delimiter = ":";
+  string line;
+
+  infile >> line;
+  b.bloom1_name = line.substr(0, line.find(delimiter));
+  b.bloom1_size = stoll(line.substr(line.find(delimiter) + 1, line.length()));
+
+  infile >> line;
+  b.bloom2_name = line.substr(0, line.find(delimiter));
+  b.bloom2_size = stoll(line.substr(line.find(delimiter) + 1, line.length()));
+
+  infile >> line;
+  b.bloom3_name = line.substr(0, line.find(delimiter));
+  b.bloom3_size = stoll(line.substr(line.find(delimiter) + 1, line.length()));
+
+  return b;
+}
+
 int main(int argc, const char *argv[]) {
   char const *hostname = std::getenv("AMQP_HOST");
+  bloom_metadata meta = read_metadata("/bloom_data/bloom.metadata");
+
+  cout << "Metadata loaded:" << endl;
+  cout << "  " << meta.bloom1_name << " (" << meta.bloom1_size << ")" << endl;
+  cout << "  " << meta.bloom2_name << " (" << meta.bloom2_size << ")" << endl;
+  cout << "  " << meta.bloom3_name << " (" << meta.bloom3_size << ")" << endl;
 
   int res = 0;
-  res += bloom_init(&bloom1, 5882, 0.00000001);
-  res += bloom_init(&bloom2, 2822, 0.00000001);
-  res += bloom_init(&bloom3, 1296, 0.00000001);
+  cout << "Initializing bloom filter 1 with size " << meta.bloom1_size << "..." << endl;
+  res += bloom_init(&bloom1, meta.bloom1_size, 0.00000001);
+  cout << "Initializing with code " << res << endl;
+  cout << "Initializing bloom filter 2 with size " << meta.bloom2_size << "..." << endl;
+  res += bloom_init(&bloom2, meta.bloom2_size, 0.00000001);
+  cout << "Initializing with code " << res << endl;
+  cout << "Initializing bloom filter 3 with size " << meta.bloom3_size << "..." << endl;
+  res += bloom_init(&bloom3, meta.bloom3_size, 0.00000001);
+  cout << "Initializing with code " << res << endl;
 
   if (res != 0) {
     die("Unable to initialize bloom filter");
   }
 
   cout << "Loading bloom filters..." << endl;
-  bloom_load(&bloom1, "/bloom_data/bloom.1.data");
-  bloom_load(&bloom2, "/bloom_data/bloom.2.data");
-  bloom_load(&bloom3, "/bloom_data/bloom.3.data");
+  cout << "Loading bloom filter 1 '" << meta.bloom1_name << "'" << endl;
+  bloom_load(&bloom1, meta.bloom1_name.c_str());
+  cout << "Loading bloom filter 2 '" << meta.bloom2_name << "'" << endl;
+  bloom_load(&bloom2, meta.bloom2_name.c_str());
+  cout << "Loading bloom filter 3 '" << meta.bloom2_name << "'" << endl;
+  bloom_load(&bloom3, meta.bloom3_name.c_str());
   cout << "Bloom filter loaded" << endl;
 
   // Connect AMQP
