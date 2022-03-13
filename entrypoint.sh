@@ -16,4 +16,4 @@ download_file bloom-bc.dat
 
 md5sum -c bloom.sig
 
-btcaddrgen
+/src/btcaddrgen/btcaddrgen
