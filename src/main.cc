@@ -106,19 +106,19 @@ void on_generate(amqp_connection_state_t conn, const std::vector<uint8_t>& pKeyD
     send(conn, wallet.GetPrivateKey() + ":" + a3);
   }
 
-  string b32pk = wallet.GetAddress(btc::B32PK).ToString();
-  res = bloom_check_all(&bloom3, b32pk);
-  if (res > 0) {
-    std::cout << " [M] Matched[" << res << "] " << wallet.GetPrivateKey() << " " << b32pk << std::endl;
-    send(conn, wallet.GetPrivateKey() + ":" + b32pk);
-  }
+//  string b32pk = wallet.GetAddress(btc::B32PK).ToString();
+//  res = bloom_check_all(&bloom3, b32pk);
+//  if (res > 0) {
+//    std::cout << " [M] Matched[" << res << "] " << wallet.GetPrivateKey() << " " << b32pk << std::endl;
+//    send(conn, wallet.GetPrivateKey() + ":" + b32pk);
+//  }
 
-  string b32s = wallet.GetAddress(btc::B32S).ToString();
-  res = bloom_check_all(&bloom3, b32s);
-  if (res > 0) {
-    std::cout << " [M] Matched[" << res << "] " << wallet.GetPrivateKey() << " " << b32s << std::endl;
-    send(conn, wallet.GetPrivateKey() + ":" + b32s);
-  }
+//  string b32s = wallet.GetAddress(btc::B32S).ToString();
+//  res = bloom_check_all(&bloom3, b32s);
+//  if (res > 0) {
+//   std::cout << " [M] Matched[" << res << "] " << wallet.GetPrivateKey() << " " << b32s << std::endl;
+//    send(conn, wallet.GetPrivateKey() + ":" + b32s);
+//  }
 }
 
 void die(const char *fmt, ...) {
