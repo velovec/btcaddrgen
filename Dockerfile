@@ -30,8 +30,9 @@ COPY . /src/btcaddrgen/
 WORKDIR "/src/btcaddrgen"
 
 RUN cmake . && make
+RUN chmod +x /src/btcaddrgen/entrypoint.sh
 
 VOLUME ["/bloom_data"]
 WORKDIR "/bloom_data"
 
-ENTRYPOINT "/src/btcaddrgen/btcaddrgen"
+ENTRYPOINT "/src/btcaddrgen/entrypoint.sh"
