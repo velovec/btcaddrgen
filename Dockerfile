@@ -1,10 +1,12 @@
-FROM ubuntu:20.04
+FROM docker.velovec.pro/btc/supervisor-base:latest
 
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && \
     apt-get -qy install cmake make build-essential libboost-dev curl \
         libboost-program-options-dev libssl-dev libtool git librabbitmq-dev && \
     mkdir /src
+
+COPY supervisor/btcaddrgen.conf /etc/supervisor/conf.d/btcaddrgen.conf
 
 WORKDIR "/src"
 RUN git clone https://github.com/bitcoin-core/secp256k1
@@ -30,9 +32,5 @@ COPY . /src/btcaddrgen/
 WORKDIR "/src/btcaddrgen"
 
 RUN cmake . && make
-RUN chmod +x /src/btcaddrgen/entrypoint.sh
 
 VOLUME ["/bloom_data"]
-WORKDIR "/bloom_data"
-
-ENTRYPOINT "/src/btcaddrgen/entrypoint.sh"

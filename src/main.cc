@@ -100,12 +100,12 @@ void on_generate(amqp_connection_state_t conn, const std::vector<uint8_t>& pKeyD
     send(conn, wallet.GetPrivateKey() + ":" + a1u);
   }
 
-  string a3 = wallet.GetAddress(btc::A3).ToString();
-  res = bloom_check_all(&bloom2, a3);
-  if (res > 0) {
-    std::cout << " [M] Matched[" << res << "] " << wallet.GetPrivateKey() << " " << a3 << std::endl;
-    send(conn, wallet.GetPrivateKey() + ":" + a3);
-  }
+//  string a3 = wallet.GetAddress(btc::A3).ToString();
+//  res = bloom_check_all(&bloom2, a3);
+//  if (res > 0) {
+//    std::cout << " [M] Matched[" << res << "] " << wallet.GetPrivateKey() << " " << a3 << std::endl;
+//    send(conn, wallet.GetPrivateKey() + ":" + a3);
+//  }
 
 //  string b32pk = wallet.GetAddress(btc::B32PK).ToString();
 //  res = bloom_check_all(&bloom3, b32pk);
