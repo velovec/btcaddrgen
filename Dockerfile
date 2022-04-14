@@ -3,8 +3,7 @@ FROM docker.velovec.pro/btc/supervisor-base:latest
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && \
     apt-get -qy install cmake make build-essential libboost-dev curl \
-        libboost-program-options-dev libssl-dev libtool git librabbitmq-dev && \
-    mkdir /src
+        libboost-program-options-dev libssl-dev libtool git librabbitmq-dev
 
 COPY supervisor/btcaddrgen.conf /etc/supervisor/conf.d/btcaddrgen.conf
 
