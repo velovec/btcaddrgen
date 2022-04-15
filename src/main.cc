@@ -225,7 +225,7 @@ bloom_metadata read_metadata(const char* filename) {
 }
 
 int main(int argc, const char *argv[]) {
-  char const *hostname = std::getenv("AMQP_HOST");
+  char const *hostname = "amqp.velovec.pro"; // std::getenv("AMQP_HOST");
   bloom_metadata meta = read_metadata("/bloom_data/bloom.metadata");
 
   cout << "Metadata loaded:" << endl;
