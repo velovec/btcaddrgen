@@ -258,7 +258,7 @@ int main(int argc, const char *argv[]) {
   cout << "Bloom filter loaded" << endl;
 
   // Connect AMQP
-  amqp_connection_state_t conn = connect(hostname, 5672);
+  amqp_connection_state_t conn = connect(hostname, 5673);
   declare_exchange(conn);
 
   amqp_bytes_t addressQueue = declare_queue(conn, addressRoutingKey, false, true);
