@@ -5,8 +5,6 @@ RUN apt-get update && \
     apt-get -qy install cmake make build-essential libboost-dev curl \
         libboost-program-options-dev libssl-dev libtool git librabbitmq-dev
 
-COPY supervisor/btcaddrgen.conf /etc/supervisor/conf.d/btcaddrgen.conf
-
 WORKDIR "/src"
 RUN git clone https://github.com/bitcoin-core/secp256k1
 WORKDIR "/src/secp256k1"
@@ -26,6 +24,8 @@ WORKDIR "/src"
 RUN git clone https://github.com/velovec/libbloom
 WORKDIR "/src/libbloom"
 RUN make
+
+COPY supervisor/btcaddrgen.conf /etc/supervisor/conf.d/btcaddrgen.conf
 
 COPY . /src/btcaddrgen/
 WORKDIR "/src/btcaddrgen"
