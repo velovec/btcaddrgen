@@ -30,6 +30,6 @@ RUN make
 COPY . /src/btcaddrgen/
 WORKDIR "/src/btcaddrgen"
 
-RUN cmake . && make
+RUN cmake . && make && chmod +x /src/btcaddrgen/btcaddrgen.sh
 
 VOLUME ["/bloom_data"]
