@@ -18,5 +18,5 @@ done
 
 NPROC=$(nproc)
 for i in $(seq -f "%02g" 1 $NPROC); do
-  supervisorctl start btcaddrgen_r${i} || echo "Skipped R${i}"
+  supervisorctl start btcaddrgen:btcaddrgen_r${i} || echo "Skipped R${i}"
 done
