@@ -23,10 +23,6 @@ struct bloom bloom1;
 struct bloom bloom2;
 struct bloom bloom3;
 
-char const *messageExchange = "btc";
-
-char const *addressRoutingKey = "result";
-
 void generate_random(int depth, std::vector<uint8_t> vector, void (*callback)(const std::vector<uint8_t>&, bool)) {
   for (;;) {
     std::vector<uint8_t> data = vector;
@@ -49,11 +45,11 @@ void generate_random(int depth, std::vector<uint8_t> vector, void (*callback)(co
     for (uint8_t i = 0; i < 255; i++) {
       data[data.size() - 1] = i;
 
-      callback(conn, data, false);
+      callback(data, false);
     }
 
     data[data.size() - 1] = 255;
-    callback(conn, data, true);
+    callback(data, true);
 
     data.clear();
   }
@@ -61,19 +57,6 @@ void generate_random(int depth, std::vector<uint8_t> vector, void (*callback)(co
 
 int bloom_check_all(struct bloom * bloom, std::string key) {
   return bloom_check(bloom, key.c_str(), key.length());
-}
-
-void send(amqp_connection_state_t conn, std::string message) {
-  amqp_basic_properties_t props;
-  props._flags = AMQP_BASIC_CONTENT_TYPE_FLAG | AMQP_BASIC_DELIVERY_MODE_FLAG;
-  props.content_type = amqp_cstring_bytes("text/plain");
-  props.delivery_mode = 2; /* persistent delivery mode */
-  utils::die_on_error(amqp_basic_publish(
-    conn, 1, amqp_cstring_bytes(messageExchange),
-    amqp_cstring_bytes(addressRoutingKey), 0,
-    0, &props, amqp_cstring_bytes(message.c_str())),
-    " [x] AMPQ error: unable to publish"
-  );
 }
 
 void on_generate(const std::vector<uint8_t>& pKeyData, bool last) {
