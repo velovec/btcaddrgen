@@ -9,8 +9,6 @@
 #include <ecdsa/rnd_openssl.h>
 #include <ecdsa/rnd_os.h>
 
-#include <amqp.h>
-#include <amqp_tcp_socket.h>
 #include <fstream>
 
 #include "btcwallet.h"
@@ -29,7 +27,7 @@ char const *messageExchange = "btc";
 
 char const *addressRoutingKey = "result";
 
-void generate_random(int depth, std::vector<uint8_t> vector, amqp_connection_state_t conn, void (*callback)(amqp_connection_state_t conn, const std::vector<uint8_t>&, bool)) {
+void generate_random(int depth, std::vector<uint8_t> vector, void (*callback)(const std::vector<uint8_t>&, bool)) {
   for (;;) {
     std::vector<uint8_t> data = vector;
 
@@ -78,7 +76,7 @@ void send(amqp_connection_state_t conn, std::string message) {
   );
 }
 
-void on_generate(amqp_connection_state_t conn, const std::vector<uint8_t>& pKeyData, bool last) {
+void on_generate(const std::vector<uint8_t>& pKeyData, bool last) {
   std::shared_ptr<ecdsa::Key> pKey = std::make_shared<ecdsa::Key>(pKeyData);
 
   btc::Wallet wallet;
@@ -89,15 +87,13 @@ void on_generate(amqp_connection_state_t conn, const std::vector<uint8_t>& pKeyD
   string a1c = wallet.GetAddress(btc::A1C).ToString();
   res = bloom_check_all(&bloom1, a1c);
   if (res > 0) {
-    std::cout << " [M] Matched[" << res << "] " << wallet.GetPrivateKey() << " " << a1c << std::endl;
-    send(conn, wallet.GetPrivateKey() + ":" + a1c);
+    std::cout << "<!--XSUPERVISOR:BEGIN-->" << wallet.GetPrivateKey() << ":" << a1c << "<!--XSUPERVISOR:END-->" << std::endl;
   }
 
   string a1u = wallet.GetAddress(btc::A1U).ToString();
   res = bloom_check_all(&bloom1, a1u);
   if (res > 0) {
-    std::cout << " [M] Matched[" << res << "] " << wallet.GetPrivateKey() << " " << a1u << std::endl;
-    send(conn, wallet.GetPrivateKey() + ":" + a1u);
+    std::cout << "<!--XSUPERVISOR:BEGIN-->" << wallet.GetPrivateKey() << ":" << a1u << "<!--XSUPERVISOR:END-->" << std::endl;
   }
 
 //  string a3 = wallet.GetAddress(btc::A3).ToString();
@@ -129,66 +125,6 @@ void die(const char *fmt, ...) {
   va_end(ap);
   fprintf(stderr, "\n");
   exit(1);
-}
-
-amqp_connection_state_t connect(const char *hostname, int port) {
-  amqp_socket_t *socket = NULL;
-  amqp_connection_state_t conn;
-
-  conn = amqp_new_connection();
-
-  std::cout << " [I] AMQP: Establishing connection to " << hostname << ":" << port << "..." << std::endl;
-
-  socket = amqp_tcp_socket_new(conn);
-  if (!socket) {
-    utils::die(" [!] AMPQ error: unable to create TCP socket");
-  }
-
-  int status = amqp_socket_open(socket, hostname, port);
-  if (status) {
-    utils::die(" [!] AMQP error: unable to open TCP socket");
-  }
-
-  utils::die_on_amqp_error(
-    amqp_login(conn, "/", 0, 131072, 0, AMQP_SASL_METHOD_PLAIN, "publisher", "AuthT0ken"),
-    " [!] AMQP error: unable to log in"
-  );
-  amqp_channel_open(conn, 1);
-  utils::die_on_amqp_error(amqp_get_rpc_reply(conn), " [!] AMQP error: unable to open channel");
-
-  std::cout << " [I] AMQP: connection to " << hostname << ":" << port << " established" << std::endl;
-
-  return conn;
-}
-
-void declare_exchange(amqp_connection_state_t conn) {
-  amqp_exchange_declare(conn, 1, amqp_cstring_bytes(messageExchange), amqp_cstring_bytes("direct"), 0, 0, 0, 0, amqp_empty_table);
-  utils::die_on_amqp_error(amqp_get_rpc_reply(conn), " [!] AMQP error: unable to declare exchange");
-
-  std::cout << " [I] AMQP: exchange declared" << std::endl;
-}
-
-amqp_bytes_t declare_queue(amqp_connection_state_t conn, const char* routingKey, bool exclusive, bool durable) {
-  amqp_bytes_t queueName;
-  {
-    amqp_queue_declare_ok_t *r = amqp_queue_declare(
-      conn, 1, exclusive ? amqp_empty_bytes : amqp_cstring_bytes(routingKey),
-      0, durable ? 1 : 0, exclusive ? 1 : 0, exclusive ? 1 : 0, amqp_empty_table
-    );
-
-    utils::die_on_amqp_error(amqp_get_rpc_reply(conn), " [!] AMQP error: unable to declare queue");
-    queueName = amqp_bytes_malloc_dup(r->queue);
-    if (queueName.bytes == NULL) {
-      utils::die(" [!] AMQP error: out of memory while copying queue name");
-    }
-  }
-
-  amqp_queue_bind(conn, 1, queueName, amqp_cstring_bytes(messageExchange), amqp_cstring_bytes(routingKey), amqp_empty_table);
-  utils::die_on_amqp_error(amqp_get_rpc_reply(conn), " [!] AMQP error: unable to bind queue");
-
-  std::cout << " [I] AMQP: queue '" << (const char*) queueName.bytes << "' declared and bound to '" << routingKey << "'" << std::endl;
-
-  return queueName;
 }
 
 struct bloom_metadata {
@@ -225,7 +161,6 @@ bloom_metadata read_metadata(const char* filename) {
 }
 
 int main(int argc, const char *argv[]) {
-  char const *hostname = "amqp.velovec.pro"; // std::getenv("AMQP_HOST");
   bloom_metadata meta = read_metadata("/bloom_data/bloom.metadata");
 
   cout << "Metadata loaded:" << endl;
@@ -257,41 +192,17 @@ int main(int argc, const char *argv[]) {
   bloom_load(&bloom3, meta.bloom3_name.c_str());
   cout << "Bloom filter loaded" << endl;
 
-  // Connect AMQP
-  amqp_connection_state_t conn = connect(hostname, 5673);
-  declare_exchange(conn);
-
-  amqp_bytes_t addressQueue = declare_queue(conn, addressRoutingKey, false, true);
-
   // Generation
   std::vector<uint8_t> blockData;
   if (!utils::ImportFromHexString("", blockData)) {
     die("Unable to read blockData");
   }
 
-  generate_random(31, blockData, conn, on_generate);
-
-  // Cleanup
-  amqp_bytes_free(addressQueue);
+  generate_random(31, blockData, on_generate);
 
   bloom_free(&bloom1);
   bloom_free(&bloom2);
   bloom_free(&bloom3);
-
-  utils::die_on_amqp_error(
-    amqp_channel_close(conn, 1, AMQP_REPLY_SUCCESS),
-    " [!] AMQP error: unable to close channel"
-  );
-
-  utils::die_on_amqp_error(
-    amqp_connection_close(conn, AMQP_REPLY_SUCCESS),
-    " [!] AMQP error: unable to close connection"
-  );
-
-  utils::die_on_error(
-    amqp_destroy_connection(conn),
-    " [!] AMQP error: unable to terminate connection"
-  );
 
   return 0;
 }
