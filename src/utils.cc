@@ -65,7 +65,8 @@ std::vector<uint8_t> checksum(const uint8_t *data, int len) {
   return checksum;
 }
 
-std::vector<uint8_t> concat(const uint8_t *src, int src_len, const uint8_t *data, int data_len) {
+std::vector<uint8_t> concat(const uint8_t *src, int src_len,
+                            const uint8_t *data, int data_len) {
   std::vector<uint8_t> long_result;
   long_result.resize(src_len + data_len);
   memcpy(long_result.data(), src, src_len);
@@ -74,7 +75,8 @@ std::vector<uint8_t> concat(const uint8_t *src, int src_len, const uint8_t *data
   return long_result;
 }
 
-std::string BinaryToHexString(const unsigned char *bin_data, size_t size, bool is_little_endian) {
+std::string BinaryToHexString(const unsigned char *bin_data, size_t size,
+                              bool is_little_endian) {
   std::stringstream ss_hex;
   if (is_little_endian) {
     // Little-endian
@@ -92,7 +94,8 @@ std::string BinaryToHexString(const unsigned char *bin_data, size_t size, bool i
   return ss_hex.str();
 }
 
-bool ImportFromHexString(const std::string &hex_str, std::vector<uint8_t> &out_data) {
+bool ImportFromHexString(const std::string &hex_str,
+                         std::vector<uint8_t> &out_data) {
   int len = hex_str.size();
   if (len % 2 != 0) {
     return false;
@@ -119,4 +122,5 @@ void die(const char *fmt, ...) {
   va_end(ap);
   fprintf(stderr, "\n");
   exit(1);
+}
 }
