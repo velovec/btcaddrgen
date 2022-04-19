@@ -1,7 +1,5 @@
 #include "utils.h"
 
-#include <amqp.h>
-#include <amqp_framing.h>
 #include <openssl/ripemd.h>
 #include <openssl/sha.h>
 #include <cstdarg>
