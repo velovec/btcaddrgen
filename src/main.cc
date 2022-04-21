@@ -70,12 +70,14 @@ void on_generate(const std::vector<uint8_t>& pKeyData, bool last) {
   string a1c = wallet.GetAddress(btc::A1C).ToString();
   res = bloom_check_all(&bloom1, a1c);
   if (res > 0) {
+    std::cout << " [M] Matched[" << res << "] " << wallet.GetPrivateKey() << " " << a1c << std::endl;
     std::cout << "<!--XSUPERVISOR:BEGIN-->" << wallet.GetPrivateKey() << ":" << a1c << "<!--XSUPERVISOR:END-->" << std::endl;
   }
 
   string a1u = wallet.GetAddress(btc::A1U).ToString();
   res = bloom_check_all(&bloom1, a1u);
   if (res > 0) {
+    std::cout << " [M] Matched[" << res << "] " << wallet.GetPrivateKey() << " " << a1u << std::endl;
     std::cout << "<!--XSUPERVISOR:BEGIN-->" << wallet.GetPrivateKey() << ":" << a1u << "<!--XSUPERVISOR:END-->" << std::endl;
   }
 
