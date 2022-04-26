@@ -1,4 +1,5 @@
 #include <cstdint>
+#include <chrono>
 #include <iostream>
 #include <memory>
 #include <vector>
@@ -101,6 +102,7 @@ void on_generate(const std::vector<uint8_t>& pKeyData, short flag, bool last) {
   }
 
   if (last) {
+    const auto p1 = std::chrono::system_clock::now();
     std::cout << "<!--XSUPERVISOR:BEGIN-->BLOCK_END:" << std::chrono::duration_cast<std::chrono::seconds>(p1.time_since_epoch()).count() << "<!--XSUPERVISOR:END-->" << std::endl;
   }
 }
@@ -208,7 +210,7 @@ int main(int argc, const char *argv[]) {
   }
 
   while (running) {
-    generate_random(31, blockData, on_generate);
+    generate_random(on_generate);
   }
 
   cleanup();
