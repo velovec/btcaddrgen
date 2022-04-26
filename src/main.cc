@@ -202,12 +202,7 @@ void sig_handler(int sig_num) {
 
 int main(int argc, const char *argv[]) {
   read_bloom_filter();
-  signal(SIGUSR1, sig_handler); // Register signal handler
-
-  std::vector<uint8_t> blockData;
-  if (!utils::ImportFromHexString("", blockData)) {
-    die("Unable to read blockData");
-  }
+  signal(SIGUSR1, sig_handler);
 
   while (running) {
     generate_random(0x01, on_generate);
