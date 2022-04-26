@@ -3,6 +3,7 @@
 #include <memory>
 #include <vector>
 #include <cstdarg>
+#include <signal.h>
 
 #include <ecdsa/key.h>
 #include <ecdsa/rnd_man.h>
@@ -23,43 +24,34 @@ struct bloom bloom1;
 struct bloom bloom2;
 struct bloom bloom3;
 
-void generate_random(int depth, std::vector<uint8_t> vector, void (*callback)(const std::vector<uint8_t>&, bool)) {
-  for (;;) {
-    std::vector<uint8_t> data = vector;
+bool running = true;
 
-    std::vector<uint8_t> rnd;
-    rnd.resize(depth - 1);
+void generate_random(short flag, void (*callback)(const std::vector<uint8_t>&, short, bool)) {
+  std::vector<uint8_t> rnd;
 
-    rnd::RandManager rnd_man(depth - 1);
-    rnd_man.Begin();
-    rnd_man.Rand<rnd::Rand_OpenSSL<128>>();
-    rnd_man.Rand<rnd::Rand_OS>();
-    rnd = rnd_man.End();
+  rnd::RandManager rnd_man(32);
+  rnd_man.Begin();
+  rnd_man.Rand<rnd::Rand_OpenSSL<128>>();
+  rnd_man.Rand<rnd::Rand_OS>();
+  rnd = rnd_man.End();
 
-//    cout << "Iteration " << w << ": " << base58::EncodeBase58(rnd) << endl;
+  for (uint8_t i = 0; i < 255; i++) {
+    rnd[rnd.size() - 1] = i;
 
-    for (int i = 0; i < depth - 1; i++) {
-      data.push_back(rnd.at(i));
-    }
-
-    for (uint8_t i = 0; i < 255; i++) {
-      data[data.size() - 1] = i;
-
-      callback(data, false);
-    }
-
-    data[data.size() - 1] = 255;
-    callback(data, true);
-
-    data.clear();
+    callback(rnd, flag, false);
   }
+
+  rnd[rnd.size() - 1] = 255;
+  callback(rnd, flag, true);
+
+  rnd.clear();
 }
 
 int bloom_check_all(struct bloom * bloom, std::string key) {
   return bloom_check(bloom, key.c_str(), key.length());
 }
 
-void on_generate(const std::vector<uint8_t>& pKeyData, bool last) {
+void on_generate(const std::vector<uint8_t>& pKeyData, short flag, bool last) {
   std::shared_ptr<ecdsa::Key> pKey = std::make_shared<ecdsa::Key>(pKeyData);
 
   btc::Wallet wallet;
@@ -67,40 +59,50 @@ void on_generate(const std::vector<uint8_t>& pKeyData, bool last) {
 
   int res;
 
-  string a1c = wallet.GetAddress(btc::A1C).ToString();
-  res = bloom_check_all(&bloom1, a1c);
-  if (res > 0) {
-    std::cout << " [M] Matched[" << res << "] " << wallet.GetPrivateKey() << " " << a1c << std::endl;
-    std::cout << "<!--XSUPERVISOR:BEGIN-->" << wallet.GetPrivateKey() << ":" << a1c << "<!--XSUPERVISOR:END-->" << std::endl;
+  if (flag & 0x01 == 0x01) {
+    string a1c = wallet.GetAddress(btc::A1C).ToString();
+    res = bloom_check_all(&bloom1, a1c);
+    if (res > 0) {
+      std::cout << " [M] Matched[" << res << "] " << wallet.GetPrivateKey() << " " << a1c << std::endl;
+      std::cout << "<!--XSUPERVISOR:BEGIN-->MATCH:" << wallet.GetPrivateKey() << ":" << a1c << "<!--XSUPERVISOR:END-->" << std::endl;
+    }
+
+    string a1u = wallet.GetAddress(btc::A1U).ToString();
+    res = bloom_check_all(&bloom1, a1u);
+    if (res > 0) {
+      std::cout << " [M] Matched[" << res << "] " << wallet.GetPrivateKey() << " " << a1u << std::endl;
+      std::cout << "<!--XSUPERVISOR:BEGIN-->MATCH:" << wallet.GetPrivateKey() << ":" << a1u << "<!--XSUPERVISOR:END-->" << std::endl;
+    }
   }
 
-  string a1u = wallet.GetAddress(btc::A1U).ToString();
-  res = bloom_check_all(&bloom1, a1u);
-  if (res > 0) {
-    std::cout << " [M] Matched[" << res << "] " << wallet.GetPrivateKey() << " " << a1u << std::endl;
-    std::cout << "<!--XSUPERVISOR:BEGIN-->" << wallet.GetPrivateKey() << ":" << a1u << "<!--XSUPERVISOR:END-->" << std::endl;
+  if (flag & 0x02 == 0x02) {
+    string a3 = wallet.GetAddress(btc::A3).ToString();
+    res = bloom_check_all(&bloom2, a3);
+    if (res > 0) {
+      std::cout << " [M] Matched[" << res << "] " << wallet.GetPrivateKey() << " " << a3 << std::endl;
+      std::cout << "<!--XSUPERVISOR:BEGIN-->MATCH:" << wallet.GetPrivateKey() << ":" << a3 << "<!--XSUPERVISOR:END-->" << std::endl;
+    }
   }
 
-//  string a3 = wallet.GetAddress(btc::A3).ToString();
-//  res = bloom_check_all(&bloom2, a3);
-//  if (res > 0) {
-//    std::cout << " [M] Matched[" << res << "] " << wallet.GetPrivateKey() << " " << a3 << std::endl;
-//    send(conn, wallet.GetPrivateKey() + ":" + a3);
-//  }
+  if (flag & 0x04 == 0x04) {
+    string b32pk = wallet.GetAddress(btc::B32PK).ToString();
+    res = bloom_check_all(&bloom3, b32pk);
+    if (res > 0) {
+      std::cout << " [M] Matched[" << res << "] " << wallet.GetPrivateKey() << " " << b32pk << std::endl;
+      std::cout << "<!--XSUPERVISOR:BEGIN-->MATCH:" << wallet.GetPrivateKey() << ":" << b32pk << "<!--XSUPERVISOR:END-->" << std::endl;
+    }
 
-//  string b32pk = wallet.GetAddress(btc::B32PK).ToString();
-//  res = bloom_check_all(&bloom3, b32pk);
-//  if (res > 0) {
-//    std::cout << " [M] Matched[" << res << "] " << wallet.GetPrivateKey() << " " << b32pk << std::endl;
-//    send(conn, wallet.GetPrivateKey() + ":" + b32pk);
-//  }
+    string b32s = wallet.GetAddress(btc::B32S).ToString();
+    res = bloom_check_all(&bloom3, b32s);
+    if (res > 0) {
+      std::cout << " [M] Matched[" << res << "] " << wallet.GetPrivateKey() << " " << b32s << std::endl;
+      std::cout << "<!--XSUPERVISOR:BEGIN-->MATCH:" << wallet.GetPrivateKey() << ":" << b32s << "<!--XSUPERVISOR:END-->" << std::endl;
+    }
+  }
 
-//  string b32s = wallet.GetAddress(btc::B32S).ToString();
-//  res = bloom_check_all(&bloom3, b32s);
-//  if (res > 0) {
-//   std::cout << " [M] Matched[" << res << "] " << wallet.GetPrivateKey() << " " << b32s << std::endl;
-//    send(conn, wallet.GetPrivateKey() + ":" + b32s);
-//  }
+  if (last) {
+    std::cout << "<!--XSUPERVISOR:BEGIN-->BLOCK_END:" << std::chrono::duration_cast<std::chrono::seconds>(p1.time_since_epoch()).count() << "<!--XSUPERVISOR:END-->" << std::endl;
+  }
 }
 
 void die(const char *fmt, ...) {
@@ -145,7 +147,7 @@ bloom_metadata read_metadata(const char* filename) {
   return b;
 }
 
-int main(int argc, const char *argv[]) {
+void read_bloom_filter() {
   bloom_metadata meta = read_metadata("/bloom_data/bloom.metadata");
 
   cout << "Metadata loaded:" << endl;
@@ -177,17 +179,38 @@ int main(int argc, const char *argv[]) {
   bloom_load(&bloom3, meta.bloom3_name.c_str());
   cout << "Bloom filter loaded" << endl;
 
-  // Generation
+  std::cout << "<!--XSUPERVISOR:BEGIN-->BLOOM_LOAD<!--XSUPERVISOR:END-->" << std::endl;
+}
+
+void cleanup() {
+  bloom_free(&bloom1);
+  bloom_free(&bloom2);
+  bloom_free(&bloom3);
+}
+
+void reload_bloom_filter() {
+  cleanup();
+
+  read_bloom_filter();
+}
+
+void sig_handler(int sig_num) {
+  read_bloom_filter();
+}
+
+int main(int argc, const char *argv[]) {
+  read_bloom_filter();
+  signal(SIGUSR1, sig_handler); // Register signal handler
+
   std::vector<uint8_t> blockData;
   if (!utils::ImportFromHexString("", blockData)) {
     die("Unable to read blockData");
   }
 
-  generate_random(31, blockData, on_generate);
+  while (running) {
+    generate_random(31, blockData, on_generate);
+  }
 
-  bloom_free(&bloom1);
-  bloom_free(&bloom2);
-  bloom_free(&bloom3);
-
+  cleanup();
   return 0;
 }
