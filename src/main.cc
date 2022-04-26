@@ -210,7 +210,7 @@ int main(int argc, const char *argv[]) {
   }
 
   while (running) {
-    generate_random(on_generate);
+    generate_random(0x01, on_generate);
   }
 
   cleanup();
