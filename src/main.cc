@@ -101,10 +101,10 @@ void on_generate(const std::vector<uint8_t>& pKeyData, short flag, bool last) {
     }
   }
 
-  if (last) {
-    const auto p1 = std::chrono::system_clock::now();
-    std::cout << "<!--XSUPERVISOR:BEGIN-->BLOCK_END:" << std::chrono::duration_cast<std::chrono::seconds>(p1.time_since_epoch()).count() << "<!--XSUPERVISOR:END-->" << std::endl;
-  }
+//  if (last) {
+//    const auto p1 = std::chrono::system_clock::now();
+//    std::cout << "<!--XSUPERVISOR:BEGIN-->BLOCK_END:" << std::chrono::duration_cast<std::chrono::seconds>(p1.time_since_epoch()).count() << "<!--XSUPERVISOR:END-->" << std::endl;
+//  }
 }
 
 void die(const char *fmt, ...) {
