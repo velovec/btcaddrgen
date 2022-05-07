@@ -19,6 +19,8 @@
 
 #include "bloom.h"
 
+#define BLOCK_COUNT 100
+
 using namespace std;
 
 struct bloom bloom1;
@@ -108,7 +110,7 @@ void on_generate(const std::vector<uint8_t>& pKeyData, short flag, bool last) {
   if (last) {
     block_count++;
 
-    if (block_count == 1000) {
+    if (block_count == BLOCK_COUNT) {
       const auto p1 = std::chrono::system_clock::now();
       long time = std::chrono::duration_cast<std::chrono::seconds>(p1.time_since_epoch()).count();
 
