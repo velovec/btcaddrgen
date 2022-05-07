@@ -28,7 +28,8 @@ struct bloom bloom3;
 bool running = true;
 
 int block_count = 0;
-long last_time = 0;
+const auto start_time = std::chrono::system_clock::now();
+long last_time = std::chrono::duration_cast<std::chrono::seconds>(start_time.time_since_epoch()).count();
 
 void generate_random(short flag, void (*callback)(const std::vector<uint8_t>&, short, bool)) {
   std::vector<uint8_t> rnd;
