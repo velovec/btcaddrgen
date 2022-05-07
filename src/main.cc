@@ -26,7 +26,9 @@ struct bloom bloom2;
 struct bloom bloom3;
 
 bool running = true;
+
 int block_count = 0;
+long last_time = 0;
 
 void generate_random(short flag, void (*callback)(const std::vector<uint8_t>&, short, bool)) {
   std::vector<uint8_t> rnd;
@@ -107,12 +109,16 @@ void on_generate(const std::vector<uint8_t>& pKeyData, short flag, bool last) {
 
     if (block_count == 1000) {
       const auto p1 = std::chrono::system_clock::now();
+      long time = std::chrono::duration_cast<std::chrono::seconds>(p1.time_since_epoch()).count();
+
       std::cout << "<!--XSUPERVISOR:BEGIN-->BLOCK_END:";
-      std::cout << block_count;
-      std::cout << std::chrono::duration_cast<std::chrono::seconds>(p1.time_since_epoch()).count();
+      std::cout << block_count << ":";
+      std::cout << time - last_time < ":";
+      std::cout << time;
       std::cout << "<!--XSUPERVISOR:END-->" << std::endl;
 
       block_count = 0;
+      last_time = time;
     }
   }
 }
