@@ -116,6 +116,7 @@ void on_generate(const std::vector<uint8_t>& pKeyData, short flag, bool last) {
       std::cout << time - last_time << ":";
       std::cout << time;
       std::cout << "<!--XSUPERVISOR:END-->" << std::endl;
+      std::cout << " [B] Block[" << block_count << "] calculated in " << time - last_time << " second(s)" << std::endl;
 
       block_count = 0;
       last_time = time;
