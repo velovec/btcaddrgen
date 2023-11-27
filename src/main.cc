@@ -59,7 +59,7 @@ void on_generate(const std::vector<uint8_t>& pKeyData, bool last) {
   std::vector<uint8_t> pubKeyData = pubKey.get_pub_key_data()
   std::vector<uint8_t> hash160 = utils::hash160(pubKeyData.data(), pubKeyData.size());
 
-  if (has160 == target_hash160) {
+  if (hash160 == target_hash160) {
     std::cout << "match found";
     
   }

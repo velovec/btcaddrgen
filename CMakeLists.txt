@@ -13,12 +13,11 @@ find_library(ECDSAXX ecdsa++)
 
 include_directories(
     "./"
-    "../libbloom"
     ${OPENSSL_INCLUDE_DIR}
 )
 
 file(GLOB src "./src/*.cc")
 
-add_executable(btcaddrgen ${src} src/btcwallet.h)
+add_executable(btcaddrgen ${src})
 
-target_link_libraries(btcaddrgen ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES} ${ECDSAXX} "/src/libbloom/build/libbloom.so.1.6")
+target_link_libraries(btcaddrgen ${Boost_LIBRARIES} ${OPENSSL_LIBRARIES} ${ECDSAXX})
