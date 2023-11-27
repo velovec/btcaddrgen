@@ -33,7 +33,7 @@ std::vector<uint8_t> target_hash160;
 void generate(void (*callback)(const std::vector<uint8_t>&, bool)) {
   std::vector<uint8_t> key = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
-  rnd::RandManager rnd_man(6);
+  rnd::RandManager rnd_man(5);
   rnd_man.Begin();
   rnd_man.Rand<rnd::Rand_OpenSSL<128>>();
   rnd_man.Rand<rnd::Rand_OS>();
@@ -46,14 +46,14 @@ void generate(void (*callback)(const std::vector<uint8_t>&, bool)) {
       for (uint8_t p3 = 0; p3 <= 255; p3++) {
         key.push_back(p3);
 
-        key = utils::concat(key.data(), key.length(), rnd.data(), rnd.length());
+        key = utils::concat(key.data(), key.size(), rnd.data(), rnd.size());
 
+        key.push_back(0);
         for (uint8_t i = 0; i < 255; i++) {
-          key[rnd.size() - 1] = i;
+          key[key.size() - 1] = i;
 
           callback(key, false);
         }
-
         key[rnd.size() - 1] = 255;
         callback(key, true);
 
