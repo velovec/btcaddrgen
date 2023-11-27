@@ -8,7 +8,7 @@ pipeline {
     }
 
     environment {
-        DOCKER_REPOSITORY = 'docker.velovec.pro/btc'
+        DOCKER_REPOSITORY = 'docker.qwhj.ru/btc'
         DOCKER_CONFIG = "${env.WORKSPACE}/.docker"
     }
 
