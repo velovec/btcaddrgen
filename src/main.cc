@@ -56,7 +56,7 @@ void on_generate(const std::vector<uint8_t>& pKeyData, bool last) {
   pKey->CalculatePublicKey(true);
   auto pubKey = pKey->CreatePubKey();
 
-  std::vector<uint8_t> pubKeyData = pubKey.get_pub_key_data()
+  std::vector<uint8_t> pubKeyData = pubKey.get_pub_key_data();
   std::vector<uint8_t> current_hash160 = utils::hash160(pubKeyData.data(), pubKeyData.size());
 
   if (current_hash160 == target_hash160) {
