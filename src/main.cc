@@ -54,14 +54,14 @@ void generate(void (*callback)(const std::vector<uint8_t>&, bool)) {
 void on_generate(const std::vector<uint8_t>& pKeyData, bool last) {
   std::shared_ptr<ecdsa::Key> pKey = std::make_shared<ecdsa::Key>(pKeyData);
   pKey->CalculatePublicKey(true);
-  std::shared_ptr<ecdsa::PubKey> pubKey = pKey->CreatePubKey();
+  auto pubKey = pKey->CreatePubKey();
 
   std::vector<uint8_t> pubKeyData = pubKey.get_pub_key_data()
-  std::vector<uint8_t> hash160 = utils::hash160(pubKeyData.data(), pubKeyData.size());
+  std::vector<uint8_t> current_hash160 = utils::hash160(pubKeyData.data(), pubKeyData.size());
 
-  if (hash160 == target_hash160) {
+  if (current_hash160 == target_hash160) {
     std::cout << "match found";
-    
+    exit(1);
   }
   
   if (last) {
