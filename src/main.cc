@@ -31,24 +31,36 @@ long last_time = std::chrono::duration_cast<std::chrono::seconds>(start_time.tim
 std::vector<uint8_t> target_hash160;
 
 void generate(void (*callback)(const std::vector<uint8_t>&, bool)) {
-  std::vector<uint8_t> rnd;
+  std::vector<uint8_t> key = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
-  rnd::RandManager rnd_man(32);
+  rnd::RandManager rnd_man(6);
   rnd_man.Begin();
   rnd_man.Rand<rnd::Rand_OpenSSL<128>>();
   rnd_man.Rand<rnd::Rand_OS>();
-  rnd = rnd_man.End();
+  std::vector<uint8_t> rnd = rnd_man.End();
 
-  for (uint8_t i = 0; i < 255; i++) {
-    rnd[rnd.size() - 1] = i;
+  for (uint8_t p1 = 2; p1 <= 3; p1++) {
+    key.push_back(p1);
+    for (uint8_t p2 = 0; p2 <= 255; p2++) {
+      key.push_back(p2);
+      for (uint8_t p3 = 0; p3 <= 255; p3++) {
+        key.push_back(p3);
 
-    callback(rnd, false);
+        key = utils::concat(key.data(), key.length(), rnd.data(), rnd.length());
+
+        for (uint8_t i = 0; i < 255; i++) {
+          key[rnd.size() - 1] = i;
+
+          callback(key, false);
+        }
+
+        key[rnd.size() - 1] = 255;
+        callback(key, true);
+
+        key.clear();
+      }
+    }
   }
-
-  rnd[rnd.size() - 1] = 255;
-  callback(rnd, true);
-
-  rnd.clear();
 }
 
 void on_generate(const std::vector<uint8_t>& pKeyData, bool last) {
