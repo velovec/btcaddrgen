@@ -1,4 +1,4 @@
-FROM docker.velovec.pro/btc/supervisor-base:latest
+FROM ubuntu:20.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && \
@@ -20,16 +20,9 @@ RUN cmake .. && make && make install
 RUN ln -s /usr/local/lib/libsecp256k1.so.0.0.0 /lib/x86_64-linux-gnu/libsecp256k1.so.0
 RUN mkdir /src/btcaddrgen
 
-WORKDIR "/src"
-RUN git clone https://github.com/velovec/libbloom
-WORKDIR "/src/libbloom"
-RUN make
-
-COPY supervisor/btcaddrgen.conf /etc/supervisor/conf.d/btcaddrgen.conf
-
 COPY . /src/btcaddrgen/
 WORKDIR "/src/btcaddrgen"
 
-RUN cmake . && make && chmod +x /src/btcaddrgen/btcaddrgen.sh
+RUN cmake . && make
 
-VOLUME ["/bloom_data"]
+ENTRYPOINT ["/src/btcaddrgen/btcaddrgen"]
