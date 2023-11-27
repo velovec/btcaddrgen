@@ -18,7 +18,7 @@
 #include "btcaddr.h"
 #include "utils.h"
 
-#define BLOCK_COUNT 100
+#define BLOCK_COUNT 256 * 256 * 2
 
 using namespace std;
 
