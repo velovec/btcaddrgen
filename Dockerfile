@@ -17,7 +17,7 @@ RUN mkdir build
 WORKDIR "/src/ecdsa_cxx/build"
 RUN cmake .. && make && make install
 
-RUN ln -s /usr/local/lib/libsecp256k1.so.0.0.0 /lib/x86_64-linux-gnu/libsecp256k1.so.0
+RUN ln -s /usr/local/lib/libsecp256k1.so.0.0.0 /lib/x86_64-linux-gnu/libsecp256k1.so.2
 RUN mkdir /src/btcaddrgen
 
 COPY . /src/btcaddrgen/

@@ -71,11 +71,6 @@ void on_generate(const std::vector<uint8_t>& pKeyData, bool last) {
       const auto p1 = std::chrono::system_clock::now();
       long time = std::chrono::duration_cast<std::chrono::seconds>(p1.time_since_epoch()).count();
 
-      std::cout << "<!--XSUPERVISOR:BEGIN-->BLOCK_END:";
-      std::cout << block_count << ":";
-      std::cout << time - last_time << ":";
-      std::cout << time;
-      std::cout << "<!--XSUPERVISOR:END-->" << std::endl;
       std::cout << " [B] Block[" << block_count << "] calculated in " << time - last_time << " second(s)" << std::endl;
 
       block_count = 0;
